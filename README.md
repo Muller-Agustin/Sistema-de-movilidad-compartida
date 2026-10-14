@@ -1,2 +1,18 @@
-# TPO-POO
-Trabajo Práctico Obligatorio - Paradigma Orientado a Objetos
+# TPO Programación Orientada a Objetos
+
+## Descripción
+Propuesta elegida: C - Sistema de movilidad compartida (bicicletas y monopatines)
+
+## Integrantes
+| Nombre | Usuario GitHub |
+|--------|----------------|
+|Müller Agustín        |  Muller-Agustin              |
+|  Franco Evans      |      FrancoEvans          |
+|  Cozzi Franco      |     Francozzii           |
+
+
+## Estructura del repositorio
+- `/docs`: enunciado, requisitos, informe, plan de pruebas
+- `/docs/uml`: diagramas (imagen exportada + archivo fuente)
+- `/src`: código fuente Java
+- `/test`: pruebas unitarias
