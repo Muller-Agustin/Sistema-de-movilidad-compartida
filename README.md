@@ -1,14 +1,14 @@
 # TPO Programación Orientada a Objetos
 
 ## Descripción
-Propuesta elegida: C - Sistema de movilidad compartida (bicicletas y monopatines)
+Propuesta elegida: C - Sistema de movilidad compartida.
 
 ## Integrantes
 | Nombre | Usuario GitHub |
 |--------|----------------|
 |Müller Agustín        |  Muller-Agustin              |
-|  Franco Evans      |      FrancoEvans          |
-|  Cozzi Franco      |     Francozzii           |
+|  Evans Gonzales Franco      |      FrancoEvans          |
+|  Cozzi Miranda Franco      |     Francozzii           |
 
 
 ## Estructura del repositorio
