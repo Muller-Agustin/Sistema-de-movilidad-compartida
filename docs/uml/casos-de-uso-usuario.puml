@@ -1,0 +1,57 @@
+@startuml casos-de-uso-usuario
+title Casos de uso - Usuario
+
+left to right direction
+skinparam actorStyle awesome
+skinparam usecase {
+  BackgroundColor #FFFFFF
+  BorderColor #555555
+}
+
+actor Usuario
+
+rectangle "Sistema de movilidad compartida" {
+  usecase "Registrarse\n(RF01)" as UC01
+  usecase "Agregar medio de pago\n(RF02)" as UC02
+  usecase "Recargar saldo\n(RF03)" as UC03
+  usecase "Consultar saldo y movimientos\n(RF04)" as UC04
+  usecase "Suscribirse al plan mensual\n(RF05)" as UC05
+  usecase "Consultar estaciones cercanas\ncon vehículos disponibles\n(RF29)" as UC06
+  usecase "Retirar vehículo\n(RF06)" as UC07
+  usecase "Cancelar retiro\n(RF07)" as UC09
+  usecase "Registrar punto de recorrido\n(RF09)" as UC10
+  usecase "Devolver vehículo\n(RF08)" as UC11
+  usecase "Consultar historial de viajes\n(RF30)" as UC16
+  usecase "Reportar falla\n(RF18)" as UC19
+
+  usecase "Validar condiciones de retiro\n(RN01, RN02, RN04, RN07)" as UC08
+  usecase "Evaluar ocupación de estación\n(RF22)" as UC28
+  usecase "Calcular tarifa\n(RF10)" as UC13
+  usecase "Aplicar mejor promoción\n(RN21, RN22, RN23)" as UC14
+  usecase "Otorgar minutos extra\npor estación llena\n(RN15)" as UC12
+  usecase "Aplicar descuento por estación\ncon baja ocupación\n(RF34)" as UC15
+  usecase "Generar orden automática\npor 3 fallas en 30 días\n(RN10)" as UC20
+}
+
+Usuario --> UC01
+Usuario --> UC02
+Usuario --> UC03
+Usuario --> UC04
+Usuario --> UC05
+Usuario --> UC06
+Usuario --> UC07
+Usuario --> UC09
+Usuario --> UC10
+Usuario --> UC11
+Usuario --> UC16
+Usuario --> UC19
+
+UC07 ..> UC08 : <<include>>
+UC07 ..> UC28 : <<include>>
+UC11 ..> UC13 : <<include>>
+UC11 ..> UC28 : <<include>>
+UC13 ..> UC14 : <<include>>
+UC12 ..> UC11 : <<extend>>
+UC15 ..> UC13 : <<extend>>
+UC20 ..> UC19 : <<extend>>
+@enduml

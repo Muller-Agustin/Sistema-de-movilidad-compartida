@@ -1,0 +1,84 @@
+@startuml casos-de-uso-operador-tecnico
+title Casos de uso — Operador y Técnico
+
+left to right direction
+skinparam backgroundColor #FFFFFF
+skinparam shadowing false
+skinparam defaultFontName "Helvetica"
+skinparam defaultFontSize 13
+skinparam ArrowColor #7A8A99
+skinparam ArrowThickness 1.3
+skinparam actorStyle awesome
+skinparam actor {
+  BackgroundColor #34495E
+  BorderColor #2C3E50
+  FontColor #FFFFFF
+  FontStyle bold
+}
+skinparam usecase {
+  BorderThickness 1.3
+  FontColor #1B2A38
+  ArrowColor #7A8A99
+}
+skinparam rectangle {
+  BackgroundColor #FAFBFC
+  BorderColor #C7D0D9
+  BorderThickness 1.2
+  FontColor #2C3E50
+  FontStyle bold
+  RoundCorner 20
+}
+skinparam titleFontSize 20
+skinparam titleFontColor #1B2A38
+skinparam titleFontStyle bold
+
+actor Operador
+actor Tecnico as "Técnico"
+
+rectangle "Sistema de movilidad compartida" {
+  usecase "Consultar y cambiar\nestado de vehículo\n(RF12)" as UC21 #FDEBD0/F8C471
+  usecase "Registrar recarga de batería\n(RF21)" as UC22 #FDEBD0/F8C471
+  usecase "Reportar falla\n(RF18)" as UC19 #FDEBD0/F8C471
+  usecase "Generar orden automática\npor 3 fallas en 30 días\n(RN10)" as UC20 #FCF3CF/F7DC6F
+  usecase "Generar orden de mantenimiento\n(RF19)" as UC23 #FDEBD0/F8C471
+  usecase "Asignar técnico con menos\nórdenes abiertas\n(RF35)" as UC24 #FCF3CF/F7DC6F
+
+  usecase "Consultar alertas\nde redistribución\n(RF22)" as UC29 #D4E6F1/85C1E9
+  usecase "Registrar traslado\n(RF23)" as UC30 #D4E6F1/85C1E9
+  usecase "Evaluar ocupación de estación\n(RF22)" as UC28 #EAEDED/D5D8DC
+
+  usecase "Detectar viajes perdidos\n(RF13)" as UC17 #D5F5E3/A9DFBF
+  usecase "Registrar nota de ajuste\n(RF14)" as UC18 #D5F5E3/A9DFBF
+
+  usecase "Consultar órdenes abiertas\n(RF31)" as UC25 #E8DAEF/C39BD3
+  usecase "Consultar órdenes cerradas\n(RF32)" as UC26 #E8DAEF/C39BD3
+  usecase "Cerrar orden de mantenimiento\n(RF20)" as UC27 #E8DAEF/C39BD3
+}
+
+Operador --> UC21
+Operador --> UC22
+Operador --> UC19
+Operador --> UC23
+Operador --> UC29
+Operador --> UC30
+Operador --> UC17
+Operador --> UC18
+
+UC25 <-- Tecnico
+UC26 <-- Tecnico
+UC27 <-- Tecnico
+
+UC20 ..> UC19 : <<extend>>
+UC24 ..> UC23 : <<extend>>
+UC30 ..> UC28 : <<include>>
+
+legend right
+  |Color|Grupo|
+  |<#FDEBD0>| Vehículos y mantenimiento |
+  |<#D4E6F1>| Estaciones y redistribución |
+  |<#D5F5E3>| Viajes |
+  |<#E8DAEF>| Órdenes (Técnico) |
+  |<#EAEDED>| Caso incluido (include) |
+  |<#FCF3CF>| Caso opcional (extend) |
+endlegend
+@enduml
