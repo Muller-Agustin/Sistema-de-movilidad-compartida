@@ -1,0 +1,84 @@
+@startuml RF08_Devolver_Vehiculo
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam ParticipantPadding 22
+skinparam BoxPadding 10
+skinparam sequence {
+  ArrowColor #333333
+  LifeLineBorderColor #777777
+  LifeLineBackgroundColor #FFFFFF
+  ParticipantBorderColor #333333
+  ParticipantBackgroundColor #F7F9FC
+  ActorBorderColor #333333
+  ActorBackgroundColor #FFFFFF
+  GroupBorderColor #7B8794
+  GroupBackgroundColor #F8FAFC
+}
+
+title RF08 - Devolver vehículo
+
+actor "Persona usuaria" as A
+participant "usuario:Usuario" as U
+participant "estacion:Estacion" as E
+participant "vehiculo:Vehiculo" as V
+participant "viaje:Viaje" as J
+participant "tarifa:Tarifa" as T
+participant "promocion:Promocion" as P
+participant "cuenta:Cuenta" as C
+
+A -> U: finalizarViaje(E, promociones)
+U -> E: estaLlena()
+E --> U: estacionLlena
+
+alt Estación llena
+  U -> J: otorgarMinutosExtra()
+  J --> U: 10 minutos adicionales sin cargo
+  U --> A: No se registra la devolución; dirigirse a otra estación dentro de los 10 minutos extra
+else Estación con capacidad disponible
+  U -> E: recibirVehiculo(V)
+  E --> U: vehículo recibido
+  U -> V: marcarDisponible()
+  V --> U: estado = DISPONIBLE
+  U -> J: finalizar(E, horaFin)
+  J --> U: viaje finalizado
+
+  U -> J: aplicarMejorPromocion(promociones)
+  loop Por cada promoción de la lista
+    J -> P: estaVigente(fechaActual)
+    P --> J: vigente
+    alt Promoción vigente
+      J -> P: esAplicable(J)
+      P --> J: aplicable
+      alt Promoción aplicable
+        J -> P: calcularDescuento(J)
+        P --> J: importeDescuento
+      end
+    end
+  end
+  J --> U: mejor promoción seleccionada (si corresponde)
+
+  U -> J: calcularImporte()
+  J -> J: getDuracionMinutos()
+  J --> J: minutosUsados
+  J -> T: calcularCosto(minutosUsados)
+  T --> J: importeBase
+  J --> U: importeFinal con promoción aplicada
+
+  U -> C: debitar(importeFinal, "Viaje")
+  create participant "debito:Debito" as D
+  C -> D: Debito(importeFinal, "Viaje")
+  C --> U: débito registrado
+  U -> C: tieneSaldoNegativo()
+  C --> U: saldoNegativo
+  alt Saldo negativo después del débito
+    U -> U: inhabilitar()
+    U --> A: Devolución confirmada; usuario inhabilitado hasta regularizar el saldo
+  else Saldo no negativo
+    U --> A: Devolución confirmada; importe debitado
+  end
+end
+
+@enduml

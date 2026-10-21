@@ -1,0 +1,80 @@
+
+@startuml RF06_Retirar_Vehiculo
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam sequenceMessageAlign center
+skinparam responseMessageBelowArrow true
+skinparam ParticipantPadding 22
+skinparam BoxPadding 10
+skinparam sequence {
+  ArrowColor #333333
+  LifeLineBorderColor #777777
+  LifeLineBackgroundColor #FFFFFF
+  ParticipantBorderColor #333333
+  ParticipantBackgroundColor #F7F9FC
+  ActorBorderColor #333333
+  ActorBackgroundColor #FFFFFF
+  GroupBorderColor #7B8794
+  GroupBackgroundColor #F8FAFC
+}
+
+title RF06 - Retirar vehículo
+
+actor "Persona usuaria" as A
+participant "usuario:Usuario" as U
+participant "tarifa:Tarifa" as T
+participant "cuenta:Cuenta" as C
+participant "estacion:Estacion" as E
+participant "vehiculo:Vehiculo" as V
+
+A -> U: iniciarViaje(V, E, T)
+
+U -> U: estaHabilitado()
+U --> U: habilitado = true/false
+
+alt Usuario inhabilitado
+  U --> A: Rechazar retiro: usuario inhabilitado
+else Usuario habilitado
+  U -> U: tieneViajeEnCurso()
+  U --> U: tieneViajeEnCurso = true/false
+
+  alt Ya existe un viaje en curso
+    U --> A: Rechazar retiro: ya tiene un viaje abierto
+  else No hay otro viaje en curso
+    U -> T: calcularSaldoMinimo()
+    T --> U: saldoMinimo
+    U -> C: tieneSaldoSuficiente(saldoMinimo)
+    C --> U: saldoSuficiente
+    U -> U: puedeRetirar(saldoMinimo)
+
+    alt Saldo insuficiente
+      U --> A: Rechazar retiro: saldo insuficiente
+    else Saldo suficiente
+      U -> E: getVehiculosDisponibles()
+      E --> U: listaVehiculos
+      U -> V: puedeRetirarse()
+      V --> U: puedeRetirarse
+
+      alt Vehículo no disponible o no pertenece a la estación
+        U --> A: Rechazar retiro: vehículo no disponible en esta estación
+      else Vehículo disponible en la estación
+        create participant "viaje:Viaje" as J
+        U -> J: Viaje(numero, U, V, E, T)
+        U -> V: marcarEnUso()
+        V --> U: estado = EN_USO
+        U -> E: liberarVehiculo(V)
+        E --> U: vehículo retirado de la estación
+
+        note over U,E
+          El registro del viaje y la actualización del estado/ubicación
+          del vehículo forman parte de una misma operación lógica.
+        end note
+
+        U --> A: Retiro confirmado: viaje iniciado
+      end
+    end
+  end
+end
+
+@enduml
