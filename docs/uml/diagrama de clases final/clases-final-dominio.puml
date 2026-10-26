@@ -1,0 +1,145 @@
+@startuml clases-final-dominio-v2
+!include estilo.iuml
+title diagrama final (dominio)
+
+package "usuarios" {
+  class Usuario #FDEBD0 {
+    -nombre : String
+    -documento : String
+    -estado : EstadoUsuario
+    +puedeRetirar(minimo : double) : boolean
+    +estaHabilitado() : boolean
+    +suscribirPlan(plan : PlanMensual)
+  }
+  class Cuenta {
+    -saldo : double
+    +recargar(importe, medio)
+    +debitar(importe, concepto)
+    +tieneSaldoSuficiente(minimo) : boolean
+  }
+  class PlanMensual
+  abstract class Movimiento
+  class Debito
+  class Recarga
+  class Ajuste
+  abstract class MedioPago
+  class Tarjeta
+  class BilleteraVirtual
+}
+
+package "viajes" {
+  class Viaje {
+    -inicio : LocalDateTime
+    -fin : LocalDateTime
+    -estado : EstadoViaje
+    +registrarPunto(c, hora)
+    +finalizar(estacion, fin)
+    +cancelar(ahora)
+    +superaLimitePerdida(ahora) : boolean
+  }
+  class NotaAjuste
+  class Tarifa {
+    +calcularCosto(minutos) : double
+  }
+  abstract class Promocion #FDEBD0 {
+    -nombre : String
+    -fechaInicio : LocalDate
+    -fechaFin : LocalDate
+    {abstract} +esAplicable(v : Viaje) : boolean
+    {abstract} +calcularDescuento(v : Viaje) : double
+  }
+  class PromoPrimerViaje #D5F5E3
+  class PromoPlanMensual #D5F5E3
+  class PromoEstacionBajaOcupacion #D5F5E3
+  class PuntoRecorrido
+}
+
+package "estaciones" {
+  class Estacion {
+    -capacidadMaxima : int
+    +estaLlena() : boolean
+    +getPorcentajeOcupacion() : double
+    +recibirVehiculo(v)
+    +liberarVehiculo(v)
+  }
+  class Coordenada <<final>>
+  class AlertaRedistribucion
+  class Traslado
+}
+
+package "vehiculos" {
+  abstract class Vehiculo {
+    -codigo : String
+    -estado : EstadoVehiculo
+    {abstract} +getTipo() : TipoVehiculo
+    +puedeRetirarse() : boolean
+    +contarFallasRecientes(hoy) : int
+  }
+  abstract class VehiculoElectrico {
+    -nivelBateria : int
+    +tieneBateriaBaja() : boolean
+    +puedeRetirarse() : boolean
+  }
+  class BicicletaComun
+  class BicicletaElectrica
+  class Monopatin
+}
+
+package "mantenimiento" {
+  class OrdenMantenimiento
+  class ReporteFalla
+  interface Reportante
+}
+
+package "personal" {
+  abstract class Personal
+  class Administrador #FDEBD0
+  class Tecnico
+  class Operador
+}
+
+Movimiento <|-- Debito
+Movimiento <|-- Recarga
+Movimiento <|-- Ajuste
+MedioPago <|-- Tarjeta
+MedioPago <|-- BilleteraVirtual
+Promocion <|-- PromoPrimerViaje
+Promocion <|-- PromoPlanMensual
+Promocion <|-- PromoEstacionBajaOcupacion
+Vehiculo <|-- BicicletaComun
+Vehiculo <|-- VehiculoElectrico
+VehiculoElectrico <|-- BicicletaElectrica
+VehiculoElectrico <|-- Monopatin
+Personal <|-- Administrador
+Personal <|-- Tecnico
+Personal <|-- Operador
+Usuario ..|> Reportante
+Operador ..|> Reportante
+
+Usuario "1" *-- "1" Cuenta
+Usuario "1" *-- "0..1" PlanMensual
+Cuenta "1" *-- "0..*" Movimiento
+Cuenta --> "0..*" MedioPago
+Usuario "1" -- "0..*" Viaje
+Viaje "1" *-- "0..*" PuntoRecorrido
+Viaje "1" *-- "0..*" NotaAjuste
+Viaje --> "1" Vehiculo
+Viaje --> "1" Tarifa
+Viaje --> "0..1" Promocion
+Viaje --> "1" Estacion : retiro
+Estacion "1" *-- "1" Coordenada
+Estacion "0..1" o-- "0..*" Vehiculo
+Estacion "1" -- "0..*" AlertaRedistribucion
+Traslado --> "1..*" Vehiculo
+Vehiculo "1" -- "0..*" ReporteFalla
+Vehiculo "1" -- "0..*" OrdenMantenimiento
+OrdenMantenimiento --> "1" Tecnico
+NotaAjuste --> "1" Operador
+
+legend right
+  |Color|Significado|
+  |<#FDEBD0>| Clase modificada respecto al diagrama inicial |
+  |<#D5F5E3>| Clase nueva |
+  Se muestran solo los miembros relevantes; enums y getters omitidos.
+endlegend
+@enduml
