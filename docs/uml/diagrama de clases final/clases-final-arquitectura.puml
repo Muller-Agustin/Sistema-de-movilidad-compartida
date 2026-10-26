@@ -1,0 +1,78 @@
+@startuml clases-final-arquitectura-v2
+!include estilo.iuml
+title diagrama final (arquitectura)
+
+hide members
+show interface members
+show abstract members
+
+package "controladores (GRASP Controlador)" #FEF9E7 {
+  class ControladorUsuarios #FCF3CF
+  class ControladorViajes #FCF3CF
+  class ControladorMantenimiento #FCF3CF
+  class ControladorEstaciones #FCF3CF
+}
+
+package "servicios (GRASP Fabricación pura / SRP)" #EBF5FB {
+  class CalculadoraDeTarifa #D5F5E3 {
+    +calcular(viaje) : double
+  }
+  class GeneradorReportes #D5F5E3
+  class ExportadorCSV #D5F5E3
+  interface Reloj #D5F5E3 {
+    +ahora() : LocalDateTime
+  }
+  class RelojReal #D5F5E3
+  class RelojSimulado #D5F5E3
+}
+
+package "persistencia (DIP)" #F4ECF7 {
+  interface Repositorio<T> #D5F5E3 {
+    +guardar(t : T)
+    +buscarTodos() : List<T>
+  }
+  class RepositorioArchivo<T> #D5F5E3
+}
+
+package "dominio" #FDFEFE {
+  class Usuario
+  class Viaje
+  class Vehiculo
+  class Estacion
+  class Promocion
+  class Tarifa
+  class OrdenMantenimiento
+  class Administrador
+}
+
+Reloj <|.. RelojReal
+Reloj <|.. RelojSimulado
+Repositorio <|.. RepositorioArchivo
+
+ControladorViajes ..> Usuario
+ControladorViajes ..> Viaje
+ControladorViajes ..> Vehiculo
+ControladorViajes ..> Estacion
+ControladorViajes --> CalculadoraDeTarifa
+ControladorViajes --> Reloj
+ControladorUsuarios ..> Usuario
+ControladorMantenimiento ..> Vehiculo
+ControladorMantenimiento ..> OrdenMantenimiento
+ControladorEstaciones ..> Estacion
+CalculadoraDeTarifa ..> Tarifa
+CalculadoraDeTarifa ..> Promocion
+GeneradorReportes ..> Viaje
+GeneradorReportes --> ExportadorCSV
+Administrador ..> GeneradorReportes
+ControladorViajes --> Repositorio
+ControladorUsuarios --> Repositorio
+ControladorMantenimiento --> Repositorio
+ControladorEstaciones --> Repositorio
+
+legend right
+  |Color|Significado|
+  |<#D5F5E3>| Clase nueva |
+  |<#FCF3CF>| Controlador |
+  Las clases del dominio se muestran sin miembros (ver vista Dominio).
+endlegend
+@enduml
