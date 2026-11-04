@@ -1,9 +1,10 @@
-package modelo;
+package modelo.tarifas;
 
 import java.time.LocalDate;
+import modelo.viajes.Viaje;
 
-public class PromoPrimerViaje extends Promocion {
-    public PromoPrimerViaje(String nombre, LocalDate fechaInicio, LocalDate fechaFin) {
+public class PromoEstacionBajaOcupacion extends Promocion {
+    public PromoEstacionBajaOcupacion(String nombre, LocalDate fechaInicio, LocalDate fechaFin) {
         super(nombre, fechaInicio, fechaFin);
     }
 
