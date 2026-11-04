@@ -1,28 +1,35 @@
-package modelo;
+package modelo.viajes;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import modelo.Usuario;
+import modelo.Vehiculo;
+import modelo.estaciones.Coordenada;
+import modelo.estaciones.Estacion;
+import modelo.tarifas.Promocion;
+import modelo.tarifas.Tarifa;
 
 public class Viaje {
-    private LocalDateTime inicio;
+    private final LocalDateTime inicio;
     private LocalDateTime fin;
     private EstadoViaje estado;
-    private Usuario usuario;
-    private List<PuntoRecorrido> puntosRecorrido;
-    private List<NotaAjuste> notasAjuste;
-    private Vehiculo vehiculo;
-    private Tarifa tarifa;
+    private final Usuario usuario;
+    private final List<PuntoRecorrido> puntosRecorrido;
+    private final List<NotaAjuste> notasAjuste;
+    private final Vehiculo vehiculo;
+    private final Tarifa tarifa;
     private Promocion promocion;
-    private Estacion retiro;
+    private final Estacion retiro;
+    private Estacion devolucion;
 
-    public Viaje(LocalDateTime inicio, LocalDateTime fin, EstadoViaje estado, Vehiculo vehiculo, Tarifa tarifa, Estacion retiro) {
-        this.inicio = inicio;
-        this.fin = fin;
-        this.estado = estado;
+    public Viaje(Usuario usuario, Vehiculo vehiculo, Tarifa tarifa, Estacion retiro, LocalDateTime inicio) {
+        this.usuario = usuario;
         this.vehiculo = vehiculo;
         this.tarifa = tarifa;
         this.retiro = retiro;
+        this.inicio = inicio;
+        this.estado = EstadoViaje.EN_CURSO;
         this.puntosRecorrido = new ArrayList<>();
         this.notasAjuste = new ArrayList<>();
     }
@@ -31,64 +38,36 @@ public class Viaje {
         return inicio;
     }
 
-    public void setInicio(LocalDateTime inicio) {
-        this.inicio = inicio;
-    }
-
     public LocalDateTime getFin() {
         return fin;
-    }
-
-    public void setFin(LocalDateTime fin) {
-        this.fin = fin;
     }
 
     public EstadoViaje getEstado() {
         return estado;
     }
 
-    public void setEstado(EstadoViaje estado) {
-        this.estado = estado;
-    }
-
     public Usuario getUsuario() {
         return usuario;
     }
 
-    public void setUsuario(Usuario usuario) {
-        this.usuario = usuario;
-    }
-
     public List<PuntoRecorrido> getPuntosRecorrido() {
-        return puntosRecorrido;
-    }
-
-    public void setPuntosRecorrido(List<PuntoRecorrido> puntosRecorrido) {
-        this.puntosRecorrido = puntosRecorrido;
+        return List.copyOf(puntosRecorrido);
     }
 
     public List<NotaAjuste> getNotasAjuste() {
-        return notasAjuste;
+        return List.copyOf(notasAjuste);
     }
 
-    public void setNotasAjuste(List<NotaAjuste> notasAjuste) {
-        this.notasAjuste = notasAjuste;
+    public void agregarNotaAjuste(NotaAjuste nota) {
+        notasAjuste.add(nota);
     }
 
     public Vehiculo getVehiculo() {
         return vehiculo;
     }
 
-    public void setVehiculo(Vehiculo vehiculo) {
-        this.vehiculo = vehiculo;
-    }
-
     public Tarifa getTarifa() {
         return tarifa;
-    }
-
-    public void setTarifa(Tarifa tarifa) {
-        this.tarifa = tarifa;
     }
 
     public Promocion getPromocion() {
@@ -103,8 +82,8 @@ public class Viaje {
         return retiro;
     }
 
-    public void setRetiro(Estacion retiro) {
-        this.retiro = retiro;
+    public Estacion getDevolucion() {
+        return devolucion;
     }
 
     public void registrarPunto(Coordenada c, LocalDateTime hora) {
