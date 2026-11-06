@@ -2,8 +2,8 @@ package modelo.estaciones;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import modelo.Operador;
-import modelo.Vehiculo;
+import modelo.personal.Operador;
+import modelo.vehiculos.Vehiculo;
 
 public class Traslado {
     private final Estacion origen;

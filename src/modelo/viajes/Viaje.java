@@ -4,9 +4,9 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import modelo.EstadoVehiculo;
+import modelo.vehiculos.EstadoVehiculo;
 import modelo.Usuario;
-import modelo.Vehiculo;
+import modelo.vehiculos.Vehiculo;
 import modelo.estaciones.Coordenada;
 import modelo.estaciones.Estacion;
 import modelo.tarifas.Promocion;
@@ -79,7 +79,7 @@ public class Viaje {
         this.fin = fin;
         this.devolucion = estacion;
         this.estado = EstadoViaje.FINALIZADO;
-        vehiculo.setEstado(EstadoVehiculo.DISPONIBLE);
+        vehiculo.marcarDisponible();
         estacion.recibirVehiculo(vehiculo);
     }
 
@@ -91,7 +91,7 @@ public class Viaje {
         }
         this.fin = ahora;
         this.estado = EstadoViaje.CANCELADO;
-        vehiculo.setEstado(EstadoVehiculo.DISPONIBLE);
+        vehiculo.marcarDisponible();
         retiro.recibirVehiculo(vehiculo);
     }
 

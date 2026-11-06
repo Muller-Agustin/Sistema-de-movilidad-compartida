@@ -1,7 +1,7 @@
 package modelo.tarifas;
 
 import java.time.LocalDate;
-import modelo.TipoVehiculo;
+import modelo.vehiculos.TipoVehiculo;
 
 public class Tarifa {
     private final TipoVehiculo tipoVehiculo;

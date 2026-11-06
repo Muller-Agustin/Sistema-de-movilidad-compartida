@@ -1,7 +1,7 @@
 package modelo.viajes;
 
 import java.time.LocalDateTime;
-import modelo.Operador;
+import modelo.personal.Operador;
 
 public class NotaAjuste {
     private final LocalDateTime fecha;
