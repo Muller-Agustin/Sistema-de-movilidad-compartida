@@ -1,11 +1,12 @@
-package modelo;
+package modelo.tarifas;
 
 import java.time.LocalDate;
+import modelo.viajes.Viaje;
 
 public abstract class Promocion {
-    private String nombre;
-    private LocalDate fechaInicio;
-    private LocalDate fechaFin;
+    private final String nombre;
+    private final LocalDate fechaInicio;
+    private final LocalDate fechaFin;
 
     protected Promocion(String nombre, LocalDate fechaInicio, LocalDate fechaFin) {
         this.nombre = nombre;
@@ -17,24 +18,12 @@ public abstract class Promocion {
         return nombre;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-
     public LocalDate getFechaInicio() {
         return fechaInicio;
     }
 
-    public void setFechaInicio(LocalDate fechaInicio) {
-        this.fechaInicio = fechaInicio;
-    }
-
     public LocalDate getFechaFin() {
         return fechaFin;
-    }
-
-    public void setFechaFin(LocalDate fechaFin) {
-        this.fechaFin = fechaFin;
     }
 
     public abstract boolean esAplicable(Viaje v);
