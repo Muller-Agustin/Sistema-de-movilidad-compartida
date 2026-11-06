@@ -1,7 +1,7 @@
 package modelo.vehiculos;
 
 
-import modelo.*;
+import modelo.estaciones.Estacion;
 import modelo.excepciones.VehiculoNoDisponibleExcepcion;
 import modelo.mantenimiento.OrdenMantenimiento;
 import modelo.mantenimiento.ReporteFalla;
