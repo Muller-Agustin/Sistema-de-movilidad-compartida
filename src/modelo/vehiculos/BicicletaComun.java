@@ -1,15 +1,14 @@
-package modeloVehiculos;
-
-import excepciones.VehiculoNoDisponibleException;
-import modelo.BicicletaElectrica;
+package modelo.vehiculos;
 
 import java.time.LocalDate;
+
+// RN09: no tiene batería, así que hereda directo de Vehiculo.
 public class BicicletaComun extends Vehiculo {
     private int rodado;
 
-    public BicicletaComun(String codigo, LocalDate fechaAlta, int rodado){
+    public BicicletaComun(String codigo, LocalDate fechaAlta, int rodado) {
         super(codigo, fechaAlta);
-        if (rodado<=0){
+        if (rodado <= 0) {
             throw new IllegalArgumentException("El rodado debe ser positivo");
         }
         this.rodado = rodado;
@@ -17,7 +16,7 @@ public class BicicletaComun extends Vehiculo {
 
     @Override
     public TipoVehiculo getTipo() {
-        return TipoVehiculo.BICILETA_COMUN;
+        return TipoVehiculo.BICICLETA_COMUN;
     }
 
     @Override
@@ -27,5 +26,3 @@ public class BicicletaComun extends Vehiculo {
 
     public int getRodado() { return rodado; }
 }
-
-

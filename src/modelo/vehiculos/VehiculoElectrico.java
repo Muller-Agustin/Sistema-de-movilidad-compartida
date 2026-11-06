@@ -1,21 +1,24 @@
-package modeloVehiculos;
+package modelo.vehiculos;
 
 import java.time.LocalDate;
 
+// Clase intermedia: agrupa lo que comparten la bicicleta eléctrica y el monopatín
+// (nivel de batería y la regla del 15 %), así no se repite en las dos subclases.
 public abstract class VehiculoElectrico extends Vehiculo {
     public static final int BATERIA_MINIMA = 15;
 
     private int nivelBateria;
 
-    protected VehiculoElectrico(String codigo, LocalDate fechaAlta, int nivelBateria){
+    protected VehiculoElectrico(String codigo, LocalDate fechaAlta, int nivelBateria) {
         super(codigo, fechaAlta);
         validarNivel(nivelBateria);
         this.nivelBateria = nivelBateria;
-        if(tieneBateriaBaja()){
+        if (tieneBateriaBaja()) {
             setEstado(EstadoVehiculo.BATERIA_BAJA);
         }
-
     }
+
+    // RN08: con menos del 15 % se considera batería baja.
     public boolean tieneBateriaBaja() {
         return nivelBateria < BATERIA_MINIMA;
     }
@@ -28,6 +31,7 @@ public abstract class VehiculoElectrico extends Vehiculo {
         }
     }
 
+    // RF21: al recargar queda al 100 % y, si estaba en batería baja, vuelve a estar disponible.
     public void recargarBateria() {
         this.nivelBateria = 100;
         if (getEstado() == EstadoVehiculo.BATERIA_BAJA) {
@@ -35,11 +39,13 @@ public abstract class VehiculoElectrico extends Vehiculo {
         }
     }
 
+    // RN08: además de estar disponible, necesita batería suficiente.
     @Override
     public boolean puedeRetirarse() {
         return super.puedeRetirarse() && !tieneBateriaBaja();
     }
 
+    // Si vuelve de un viaje o de reparación con poca batería, queda en batería baja.
     @Override
     public void marcarDisponible() {
         if (tieneBateriaBaja()) {
@@ -62,5 +68,3 @@ public abstract class VehiculoElectrico extends Vehiculo {
 
     public int getNivelBateria() { return nivelBateria; }
 }
-
-

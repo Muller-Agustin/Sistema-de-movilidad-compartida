@@ -1,5 +1,7 @@
 package modelo;
 
+import modelo.personal.Operador;
+
 public class NotaAjuste {
     private Operador operador;
 

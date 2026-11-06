@@ -1,4 +1,5 @@
-package modeloVehiculos;
+package modelo.vehiculos;
+
 import java.time.LocalDate;
 
 public class Monopatin extends VehiculoElectrico {

@@ -1,5 +1,7 @@
 package modelo;
 
+import modelo.vehiculos.Vehiculo;
+
 import java.util.ArrayList;
 import java.util.List;
 

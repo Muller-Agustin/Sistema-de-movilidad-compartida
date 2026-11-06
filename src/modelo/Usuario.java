@@ -1,5 +1,7 @@
 package modelo;
 
+import modelo.mantenimiento.Reportante;
+
 import java.util.ArrayList;
 import java.util.List;
 

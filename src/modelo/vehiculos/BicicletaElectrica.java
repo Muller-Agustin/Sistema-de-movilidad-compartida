@@ -1,4 +1,5 @@
-package modeloVehiculos;
+package modelo.vehiculos;
+
 import java.time.LocalDate;
 
 public class BicicletaElectrica extends VehiculoElectrico {
@@ -14,7 +15,7 @@ public class BicicletaElectrica extends VehiculoElectrico {
 
     @Override
     public TipoVehiculo getTipo() {
-        return TipoVehiculo.BICILETA_ELECTRICA;
+        return TipoVehiculo.BICICLETA_ELECTRICA;
     }
 
     @Override
