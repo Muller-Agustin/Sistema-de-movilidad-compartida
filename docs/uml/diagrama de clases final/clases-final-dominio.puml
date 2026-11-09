@@ -1,145 +1,317 @@
-@startuml clases-final-dominio-v2
-!include estilo.iuml
-title diagrama final (dominio)
+@startuml clases-final-dominio
+' Diagrama de clases final (dominio) - coincide con el código de /src
+' Se omiten constructores, getters/setters y toString().
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 50
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1F4E79
+  ArrowColor #333333
+}
+hide empty members
 
-package "usuarios" {
-  class Usuario #FDEBD0 {
+title Diagrama de clases final - Dominio
+
+package "UsuariosCuenta" #EAF2FB {
+  class Usuario {
     -nombre : String
     -documento : String
-    -estado : EstadoUsuario
-    +puedeRetirar(minimo : double) : boolean
+    -email : String
+    -fechaAlta : LocalDate
+    -habilitado : boolean
     +estaHabilitado() : boolean
-    +suscribirPlan(plan : PlanMensual)
+    +getViajeEnCurso() : Viaje
+    +tieneViajeEnCurso() : boolean
+    +iniciarViaje(numero : int, vehiculo : Vehiculo, estacion : Estacion, tarifa : Tarifa, inicio : LocalDateTime) : Viaje
+    +finalizarViaje(estacion : Estacion, promociones : List<Promocion>, horaFin : LocalDateTime) : double
+    +recargarSaldo(importe : double, medio : MedioPago, fecha : LocalDateTime)
+    +cobrar(importe : double, concepto : String, fecha : LocalDateTime)
+    +ajustarSaldo(importe : double, motivo : String, fecha : LocalDateTime)
+    +suscribirPlan(fecha : LocalDateTime)
+    -actualizarHabilitacion()
   }
   class Cuenta {
     -saldo : double
-    +recargar(importe, medio)
-    +debitar(importe, concepto)
-    +tieneSaldoSuficiente(minimo) : boolean
+    +agregarMedioPago(medio : MedioPago)
+    +recargar(importe : double, medio : MedioPago, fecha : LocalDateTime)
+    +debitar(importe : double, concepto : String, fecha : LocalDateTime)
+    +ajustar(importe : double, motivo : String, fecha : LocalDateTime)
+    +tieneSaldoSuficiente(minimo : double) : boolean
+    -registrar(movimiento : Movimiento)
   }
-  class PlanMensual
-  abstract class Movimiento
-  class Debito
+  class PlanMensual {
+    +{static} PRECIO : double = 8000
+    +{static} VIAJES_INCLUIDOS : int = 20
+    +{static} MINUTOS_MAXIMOS : int = 30
+    -fechaAlta : LocalDate
+    -mesActual : YearMonth
+    -viajesUsados : int
+    +tieneViajesDisponibles(hoy : LocalDate) : boolean
+    +registrarViaje(hoy : LocalDate)
+  }
+  abstract class Movimiento {
+    -fecha : LocalDateTime
+    -importe : double
+    -concepto : String
+    +{abstract} getEfectoSobreSaldo() : double
+    +{abstract} getTipo() : String
+  }
   class Recarga
+  class Debito
   class Ajuste
-  abstract class MedioPago
-  class Tarjeta
-  class BilleteraVirtual
+  abstract class MedioPago {
+    +{abstract} getDescripcion() : String
+  }
+  class Tarjeta {
+    -titular : String
+    -ultimosDigitos : String
+  }
+  class BilleteraVirtual {
+    -alias : String
+  }
 }
 
-package "viajes" {
+package "ViajesTarifas" #EAF7EE {
   class Viaje {
+    -numero : int
     -inicio : LocalDateTime
     -fin : LocalDateTime
     -estado : EstadoViaje
-    +registrarPunto(c, hora)
-    +finalizar(estacion, fin)
-    +cancelar(ahora)
-    +superaLimitePerdida(ahora) : boolean
+    -descuento : double
+    -importe : double
+    -intentoFallidoDevolucion : LocalDateTime
+    +registrarPunto(coordenada : Coordenada, hora : LocalDateTime)
+    +otorgarMinutosExtra(hora : LocalDateTime)
+    +finalizar(estacion : Estacion, horaFin : LocalDateTime)
+    +aplicarMejorPromocion(promociones : List<Promocion>)
+    +calcularImporte() : double
+    +getDuracionMinutos() : int
+    +getDistanciaKm() : double
+    +cancelar(ahora : LocalDateTime)
+    +superaLimitePerdida(ahora : LocalDateTime) : boolean
+    +marcarPerdido(ahora : LocalDateTime)
+    +agregarNotaAjuste(nota : NotaAjuste)
   }
-  class NotaAjuste
+  enum EstadoViaje {
+    EN_CURSO
+    FINALIZADO
+    CANCELADO
+    PERDIDO
+  }
   class Tarifa {
-    +calcularCosto(minutos) : double
+    -tipoVehiculo : TipoVehiculo
+    -cargoDesbloqueo : double
+    -precioPorMinuto : double
+    -fechaVigencia : LocalDate
+    +calcularCosto(minutos : int) : double
+    +calcularSaldoMinimo() : double
   }
-  abstract class Promocion #FDEBD0 {
+  abstract class Promocion {
     -nombre : String
     -fechaInicio : LocalDate
     -fechaFin : LocalDate
-    {abstract} +esAplicable(v : Viaje) : boolean
-    {abstract} +calcularDescuento(v : Viaje) : double
+    +estaVigente(fecha : LocalDate) : boolean
+    +{abstract} esAplicable(viaje : Viaje) : boolean
+    +{abstract} calcularDescuento(viaje : Viaje) : double
+    +registrarUso(viaje : Viaje)
   }
-  class PromoPrimerViaje #D5F5E3
-  class PromoPlanMensual #D5F5E3
-  class PromoEstacionBajaOcupacion #D5F5E3
-  class PuntoRecorrido
+  class PromoPrimerViaje {
+    +esAplicable(viaje : Viaje) : boolean
+    +calcularDescuento(viaje : Viaje) : double
+  }
+  class PromoPlanMensual {
+    +esAplicable(viaje : Viaje) : boolean
+    +calcularDescuento(viaje : Viaje) : double
+    +registrarUso(viaje : Viaje)
+  }
+  class PuntoRecorrido {
+    -hora : LocalDateTime
+  }
+  class NotaAjuste {
+    -fecha : LocalDateTime
+    -importe : double
+    -motivo : String
+  }
 }
 
-package "estaciones" {
+package "EstacionesTraslados" #FFF6E5 {
   class Estacion {
+    -codigo : String
+    -direccion : String
     -capacidadMaxima : int
+    -alertaActiva : TipoAlerta
     +estaLlena() : boolean
+    +getLugaresLibres() : int
     +getPorcentajeOcupacion() : double
-    +recibirVehiculo(v)
-    +liberarVehiculo(v)
+    +getVehiculosDisponibles() : List<Vehiculo>
+    +recibirVehiculo(v : Vehiculo, fecha : LocalDateTime)
+    +liberarVehiculo(v : Vehiculo, fecha : LocalDateTime)
+    -verificarOcupacion(fecha : LocalDateTime)
   }
-  class Coordenada <<final>>
-  class AlertaRedistribucion
-  class Traslado
+  class Coordenada {
+    -latitud : double
+    -longitud : double
+    +distanciaKm(otra : Coordenada) : double
+  }
+  class AlertaRedistribucion {
+    -tipo : TipoAlerta
+    -fecha : LocalDateTime
+  }
+  enum TipoAlerta {
+    VACIA
+    SATURADA
+  }
+  class Traslado {
+    -fecha : LocalDateTime
+  }
 }
 
-package "vehiculos" {
+package "VehiculoMantenimiento" #F3EDF9 {
   abstract class Vehiculo {
+    +{static} MAX_FALLAS : int = 3
+    +{static} DIAS_CONTROL_FALLAS : int = 30
     -codigo : String
+    -fechaAlta : LocalDate
+    -kmRecorridos : double
     -estado : EstadoVehiculo
-    {abstract} +getTipo() : TipoVehiculo
+    -mantenimientoPendiente : boolean
+    +{abstract} getTipo() : TipoVehiculo
     +puedeRetirarse() : boolean
-    +contarFallasRecientes(hoy) : int
+    +marcarEnUso()
+    +marcarDisponible()
+    +enviarAReparacion()
+    +darDeBaja()
+    +sumarKm(km : double)
+    +agregarReporte(reporte : ReporteFalla)
+    +requiereMantenimientoObligatorio(hoy : LocalDate) : boolean
+    +contarFallasRecientes(hoy : LocalDate) : int
+    +tieneOrdenAbierta() : boolean
+    +agregarOrden(orden : OrdenMantenimiento)
+    +getCantidadFallas() : int
+    #setEstado(estado : EstadoVehiculo)
+    +compareTo(otro : Vehiculo) : int
   }
   abstract class VehiculoElectrico {
+    +{static} BATERIA_MINIMA : int = 15
     -nivelBateria : int
     +tieneBateriaBaja() : boolean
+    +recargarBateria()
     +puedeRetirarse() : boolean
+    +marcarDisponible()
   }
-  class BicicletaComun
-  class BicicletaElectrica
-  class Monopatin
+  class BicicletaComun {
+    -rodado : int
+    +getTipo() : TipoVehiculo
+  }
+  class BicicletaElectrica {
+    -autonomiaKm : double
+    +getTipo() : TipoVehiculo
+  }
+  class Monopatin {
+    -velocidadMaxima : double
+    +getTipo() : TipoVehiculo
+  }
+  enum EstadoVehiculo {
+    DISPONIBLE
+    EN_USO
+    EN_REPARACION
+    BATERIA_BAJA
+    FUERA_DE_SERVICIO
+  }
+  enum TipoVehiculo {
+    BICICLETA_COMUN
+    BICICLETA_ELECTRICA
+    MONOPATIN
+  }
+  interface Reportante {
+    +reportarFalla(vehiculo : Vehiculo, descripcion : String, fecha : LocalDate) : ReporteFalla
+    +getIdentificacion() : String
+  }
+  class ReporteFalla {
+    -fecha : LocalDate
+    -descripcion : String
+    +esReciente(hoy : LocalDate, dias : int) : boolean
+  }
+  class OrdenMantenimiento {
+    -fechaApertura : LocalDate
+    -fechaCierre : LocalDate
+    -tareasRealizadas : List<String>
+    -repuestosUtilizados : List<String>
+    +cerrar(fecha : LocalDate, tareas : List<String>, repuestos : List<String>)
+    +estaAbierta() : boolean
+  }
+  class ComparadorVehiculosPorFallas {
+    +compare(primero : Vehiculo, segundo : Vehiculo) : int
+  }
 }
 
-package "mantenimiento" {
-  class OrdenMantenimiento
-  class ReporteFalla
-  interface Reportante
+package "PersonalServicio" #FDECEC {
+  abstract class Personal {
+    -legajo : String
+    -nombre : String
+    -telefono : String
+  }
+  class Operador {
+    +reportarFalla(vehiculo : Vehiculo, descripcion : String, fecha : LocalDate) : ReporteFalla
+    +generarOrden(vehiculo : Vehiculo, tecnico : Tecnico, fecha : LocalDate) : OrdenMantenimiento
+    +redistribuir(origen : Estacion, destino : Estacion, vehiculos : List<Vehiculo>, fecha : LocalDateTime) : Traslado
+  }
+  class Tecnico {
+    +asignarOrden(orden : OrdenMantenimiento)
+    +contarOrdenesAbiertas() : int
+  }
+  class Administrador
 }
 
-package "personal" {
-  abstract class Personal
-  class Administrador #FDEBD0
-  class Tecnico
-  class Operador
-}
-
-Movimiento <|-- Debito
+' ===== Herencia e implementación =====
 Movimiento <|-- Recarga
+Movimiento <|-- Debito
 Movimiento <|-- Ajuste
 MedioPago <|-- Tarjeta
 MedioPago <|-- BilleteraVirtual
 Promocion <|-- PromoPrimerViaje
 Promocion <|-- PromoPlanMensual
-Promocion <|-- PromoEstacionBajaOcupacion
 Vehiculo <|-- BicicletaComun
 Vehiculo <|-- VehiculoElectrico
 VehiculoElectrico <|-- BicicletaElectrica
 VehiculoElectrico <|-- Monopatin
-Personal <|-- Administrador
-Personal <|-- Tecnico
 Personal <|-- Operador
-Usuario ..|> Reportante
-Operador ..|> Reportante
+Personal <|-- Tecnico
+Personal <|-- Administrador
+Reportante <|.. Usuario
+Reportante <|.. Operador
 
+' ===== Usuarios =====
 Usuario "1" *-- "1" Cuenta
 Usuario "1" *-- "0..1" PlanMensual
 Cuenta "1" *-- "0..*" Movimiento
-Cuenta --> "0..*" MedioPago
+Cuenta "1" o-- "0..*" MedioPago
+Recarga --> "1" MedioPago
 Usuario "1" -- "0..*" Viaje
-Viaje "1" *-- "0..*" PuntoRecorrido
-Viaje "1" *-- "0..*" NotaAjuste
+
+' ===== Viajes =====
 Viaje --> "1" Vehiculo
 Viaje --> "1" Tarifa
-Viaje --> "0..1" Promocion
 Viaje --> "1" Estacion : retiro
+Viaje --> "0..1" Estacion : devolucion
+Viaje --> "0..1" Promocion
+Viaje "1" *-- "0..*" PuntoRecorrido
+Viaje "1" *-- "0..*" NotaAjuste
+Viaje --> EstadoViaje
+PuntoRecorrido --> "1" Coordenada
+NotaAjuste --> "1" Operador
+Tarifa --> TipoVehiculo
+
+' ===== Estaciones =====
 Estacion "1" *-- "1" Coordenada
 Estacion "0..1" o-- "0..*" Vehiculo
-Estacion "1" -- "0..*" AlertaRedistribucion
-Traslado --> "1..*" Vehiculo
-Vehiculo "1" -- "0..*" ReporteFalla
-Vehiculo "1" -- "0..*" OrdenMantenimiento
-OrdenMantenimiento --> "1" Tecnico
-NotaAjuste --> "1" Operador
-
-legend right
-  |Color|Significado|
-  |<#FDEBD0>| Clase modificada respecto al diagrama inicial |
-  |<#D5F5E3>| Clase nueva |
-  Se muestran solo los miembros relevantes; enums y getters omitidos.
-endlegend
-@enduml
+Estacion "1" *-- "0..*" AlertaRedistribucion
+AlertaRedistribucion --> TipoAlerta
+Traslado --> "1" Estacion : origen
+Traslado -->

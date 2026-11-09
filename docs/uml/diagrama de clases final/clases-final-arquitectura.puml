@@ -1,78 +1,138 @@
-@startuml clases-final-arquitectura-v2
-!include estilo.iuml
-title diagrama final (arquitectura)
+@startuml clases-final-arquitectura
+' Diagrama de clases final (arquitectura) - coincide con el código de /src
+skinparam shadowing false
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam classAttributeIconSize 0
+skinparam packageStyle rectangle
+skinparam class {
+  BackgroundColor #FFFFFF
+  BorderColor #1F4E79
+  ArrowColor #333333
+}
+hide empty members
 
-hide members
-show interface members
-show abstract members
+title Diagrama de clases final - Arquitectura
 
-package "controladores (GRASP Controlador)" #FEF9E7 {
-  class ControladorUsuarios #FCF3CF
-  class ControladorViajes #FCF3CF
-  class ControladorMantenimiento #FCF3CF
-  class ControladorEstaciones #FCF3CF
+package "VistaMain (interfaz Swing)" #EAF2FB {
+  class Main {
+    -{static} ARCHIVO_DATOS : String = "datos/sistema.dat"
+    +{static} main(args : String[])
+    -{static} cargarDatosIniciales(sistema : SistemaMovilidad)
+  }
+  class VentanaPrincipal {
+    -administradorPantallas : CardLayout
+    -agregarPantalla(nombre : String, pantalla : PanelBase)
+    -cerrarSistema()
+  }
+  abstract class PanelBase {
+    #sistema : SistemaMovilidad
+    +{abstract} actualizar()
+    #crearBoton(texto : String) : JButton
+    #crearTabla(modelo : DefaultTableModel) : JTable
+    #mostrarFormulario(titulo : String, etiquetas : String[], campos : JComponent[]) : boolean
+    #mostrarError(mensaje : String)
+  }
+  class PanelInicio
+  class PanelUsuarios
+  class PanelViajes
+  class PanelVehiculos
+  class PanelEstaciones
+  class PanelReportes
 }
 
-package "servicios (GRASP Fabricación pura / SRP)" #EBF5FB {
-  class CalculadoraDeTarifa #D5F5E3 {
-    +calcular(viaje) : double
+package "GeneralPersistencia" #EAF7EE {
+  class SistemaMovilidad <<Serializable>> {
+    -operadores : List<Operador>
+    +registrarOperador(operador : Operador)
+    +buscarOperador(legajo : String) : Operador
   }
-  class GeneradorReportes #D5F5E3
-  class ExportadorCSV #D5F5E3
-  interface Reloj #D5F5E3 {
-    +ahora() : LocalDateTime
+  class GestorArchivos <<Fabricación pura / SRP>> {
+    -rutaArchivo : String
+    +existenDatos() : boolean
+    +guardar(sistema : SistemaMovilidad)
+    +cargar() : SistemaMovilidad
   }
-  class RelojReal #D5F5E3
-  class RelojSimulado #D5F5E3
 }
 
-package "persistencia (DIP)" #F4ECF7 {
-  interface Repositorio<T> #D5F5E3 {
-    +guardar(t : T)
-    +buscarTodos() : List<T>
+package "Controladores (GRASP Controlador)" #FFF6E5 {
+  class ControladorUsuarios {
+    -usuarios : List<Usuario>
+    +registrarUsuario(usuario : Usuario)
+    +buscarUsuario(documento : String) : Usuario
+    +agregarMedioPago(usuario : Usuario, medio : MedioPago)
+    +recargarSaldo(usuario : Usuario, importe : double, medio : MedioPago)
+    +suscribirPlan(usuario : Usuario)
   }
-  class RepositorioArchivo<T> #D5F5E3
+  class ControladorViajes {
+    -tarifas : List<Tarifa>
+    -promociones : List<Promocion>
+    -viajes : List<Viaje>
+    -proximoNumeroViaje : int
+    +agregarTarifa(tarifa : Tarifa)
+    +buscarTarifaVigente(tipo : TipoVehiculo, fecha : LocalDate) : Tarifa
+    +agregarPromocion(promocion : Promocion)
+    +retirar(usuario : Usuario, vehiculo : Vehiculo, estacion : Estacion) : Viaje
+    +devolver(usuario : Usuario, estacion : Estacion) : double
+    +registrarPunto(viaje : Viaje, coordenada : Coordenada)
+    +cancelar(viaje : Viaje)
+    +detectarViajesPerdidos() : List<Viaje>
+    +registrarAjuste(viaje : Viaje, operador : Operador, importe : double, motivo : String) : NotaAjuste
+    +contarViajesPorEstacion(estacion : Estacion) : int
+    +listarViajesEnCurso() : List<Viaje>
+  }
+  class ControladorMantenimiento {
+    -vehiculos : List<Vehiculo>
+    -tecnicos : List<Tecnico>
+    -ordenes : List<OrdenMantenimiento>
+    +registrarVehiculo(vehiculo : Vehiculo, estacion : Estacion)
+    +buscarVehiculo(codigo : String) : Vehiculo
+    +listarVehiculos() : List<Vehiculo>
+    +listarVehiculosPorEstado(estado : EstadoVehiculo) : List<Vehiculo>
+    +listarVehiculosConMasFallas() : List<Vehiculo>
+    +cambiarEstado(vehiculo : Vehiculo, nuevoEstado : EstadoVehiculo)
+    +recargarBateria(vehiculo : Vehiculo)
+    +registrarTecnico(tecnico : Tecnico)
+    +reportarFalla(autor : Reportante, vehiculo : Vehiculo, descripcion : String) : ReporteFalla
+    +generarOrden(operador : Operador, vehiculo : Vehiculo, tecnico : Tecnico) : OrdenMantenimiento
+    +tecnicoConMenosOrdenes() : Tecnico
+    +cerrarOrden(orden : OrdenMantenimiento, tareas : List<String>, repuestos : List<String>)
+    +listarOrdenesAbiertas() : List<OrdenMantenimiento>
+  }
+  class ControladorEstaciones {
+    -estaciones : List<Estacion>
+    -traslados : List<Traslado>
+    +registrarEstacion(estacion : Estacion)
+    +buscarEstacion(codigo : String) : Estacion
+    +listarAlertas() : List<AlertaRedistribucion>
+    +redistribuir(operador : Operador, origen : Estacion, destino : Estacion, vehiculos : List<Vehiculo>) : Traslado
+  }
 }
 
-package "dominio" #FDFEFE {
+package "Dominio (ver diagrama de dominio)" #F3EDF9 {
   class Usuario
   class Viaje
-  class Vehiculo
-  class Estacion
-  class Promocion
   class Tarifa
+  abstract class Promocion
+  abstract class Vehiculo
   class OrdenMantenimiento
-  class Administrador
+  class Estacion
+  class Traslado
+  class Operador
+  class Tecnico
 }
 
-Reloj <|.. RelojReal
-Reloj <|.. RelojSimulado
-Repositorio <|.. RepositorioArchivo
+package "Excepciones (extienden Exception)" #FDECEC {
+  class RetiroNoPermitidoExcepcion
+  class VehiculoNoDisponibleExcepcion
+  class EstacionLlenaExcepcion
+  class SaldoInsuficienteExcepcion
+  class OrdenIncompletaExcepcion
+}
 
-ControladorViajes ..> Usuario
-ControladorViajes ..> Viaje
-ControladorViajes ..> Vehiculo
-ControladorViajes ..> Estacion
-ControladorViajes --> CalculadoraDeTarifa
-ControladorViajes --> Reloj
-ControladorUsuarios ..> Usuario
-ControladorMantenimiento ..> Vehiculo
-ControladorMantenimiento ..> OrdenMantenimiento
-ControladorEstaciones ..> Estacion
-CalculadoraDeTarifa ..> Tarifa
-CalculadoraDeTarifa ..> Promocion
-GeneradorReportes ..> Viaje
-GeneradorReportes --> ExportadorCSV
-Administrador ..> GeneradorReportes
-ControladorViajes --> Repositorio
-ControladorUsuarios --> Repositorio
-ControladorMantenimiento --> Repositorio
-ControladorEstaciones --> Repositorio
-
-legend right
-  |Color|Significado|
-  |<#D5F5E3>| Clase nueva |
-  |<#FCF3CF>| Controlador |
-  Las clases del dominio se muestran sin miembros (ver vista Dominio).
-endlegend
-@enduml
+' ===== Vista =====
+Main ..> GestorArchivos : carga
+Main ..> VentanaPrincipal : abre
+VentanaPrincipal "1" *-- "6" PanelBase
+VentanaPrincipal --> GestorArchivos : guarda al cerrar
+PanelBase <|-- PanelInicio
