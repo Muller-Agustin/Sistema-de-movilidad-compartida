@@ -2,14 +2,14 @@ package VehiculoMantenimiento;
 
 import java.time.LocalDate;
 
+// Monopatín eléctrico: tiene batería (heredada) y una velocidad máxima.
+
 public class Monopatin extends VehiculoElectrico {
-    private final double velocidadMaxima;
+    private static final long serialVersionUID = 1L;
+    private double velocidadMaxima;
 
     public Monopatin(String codigo, LocalDate fechaAlta, int nivelBateria, double velocidadMaxima) {
         super(codigo, fechaAlta, nivelBateria);
-        if (velocidadMaxima <= 0) {
-            throw new IllegalArgumentException("La velocidad máxima debe ser mayor a cero");
-        }
         this.velocidadMaxima = velocidadMaxima;
     }
 

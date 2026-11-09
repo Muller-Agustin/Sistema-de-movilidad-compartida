@@ -6,13 +6,17 @@ import java.util.List;
 
 import EstacionesTraslados.Estacion;
 import EstacionesTraslados.Traslado;
-import PersonalServicio.Tecnico;
 import VehiculoMantenimiento.OrdenMantenimiento;
 import VehiculoMantenimiento.Reportante;
 import VehiculoMantenimiento.ReporteFalla;
 import VehiculoMantenimiento.Vehiculo;
 
+// Operador del servicio: reporta fallas, genera órdenes de mantenimiento (RF19)
+// y redistribuye vehículos entre estaciones (RF23).
+
 public class Operador extends Personal implements Reportante {
+    private static final long serialVersionUID = 1L;
+
     public Operador(String legajo, String nombre, String telefono) {
         super(legajo, nombre, telefono);
     }
@@ -21,11 +25,7 @@ public class Operador extends Personal implements Reportante {
     @Override
     public ReporteFalla reportarFalla(Vehiculo vehiculo, String descripcion, LocalDate fecha) {
         ReporteFalla reporte = new ReporteFalla(vehiculo, this, fecha, descripcion);
-        try {
-            vehiculo.getClass().getMethod("agregarReporte", reporte.getClass()).invoke(vehiculo, reporte);
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException("No se pudo agregar el reporte de falla", e);
-        }
+        vehiculo.agregarReporte(reporte);
         return reporte;
     }
 
@@ -36,14 +36,7 @@ public class Operador extends Personal implements Reportante {
 
     // RF19: genera la orden, la asigna al técnico y manda el vehículo a reparación.
     public OrdenMantenimiento generarOrden(Vehiculo vehiculo, Tecnico tecnico, LocalDate fecha) {
-        OrdenMantenimiento orden;
-        try {
-            orden = OrdenMantenimiento.class
-                    .getConstructor(Vehiculo.class, Tecnico.class, LocalDate.class)
-                    .newInstance(vehiculo, tecnico, fecha);
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException("No se pudo generar la orden de mantenimiento", e);
-        }
+        OrdenMantenimiento orden = new OrdenMantenimiento(vehiculo, tecnico, fecha);
         vehiculo.enviarAReparacion();
         return orden;
     }

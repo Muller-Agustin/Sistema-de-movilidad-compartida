@@ -2,14 +2,14 @@ package VehiculoMantenimiento;
 
 import java.time.LocalDate;
 
+// Bicicleta eléctrica: tiene batería (heredada) y una autonomía en km.
+
 public class BicicletaElectrica extends VehiculoElectrico {
-    private final double autonomiaKm;
+    private static final long serialVersionUID = 1L;
+    private double autonomiaKm;
 
     public BicicletaElectrica(String codigo, LocalDate fechaAlta, int nivelBateria, double autonomiaKm) {
         super(codigo, fechaAlta, nivelBateria);
-        if (autonomiaKm <= 0) {
-            throw new IllegalArgumentException("La autonomía debe ser mayor a cero");
-        }
         this.autonomiaKm = autonomiaKm;
     }
 

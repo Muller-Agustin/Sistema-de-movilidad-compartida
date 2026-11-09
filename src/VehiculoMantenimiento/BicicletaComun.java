@@ -2,14 +2,14 @@ package VehiculoMantenimiento;
 
 import java.time.LocalDate;
 
+// Bicicleta común: no tiene batería (RN09). Se registra el tamaño de rodado.
+
 public class BicicletaComun extends Vehiculo {
-    private final int rodado;
+    private static final long serialVersionUID = 1L;
+    private int rodado;
 
     public BicicletaComun(String codigo, LocalDate fechaAlta, int rodado) {
         super(codigo, fechaAlta);
-        if (rodado <= 0) {
-            throw new IllegalArgumentException("El rodado debe ser mayor a cero");
-        }
         this.rodado = rodado;
     }
 
