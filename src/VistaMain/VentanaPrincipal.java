@@ -38,6 +38,9 @@ public class VentanaPrincipal extends JFrame {
         agregarPantalla("Inicio", new PanelInicio(sistema));
         agregarPantalla("Usuarios", new PanelUsuarios(sistema));
         agregarPantalla("Viajes", new PanelViajes(sistema));
+        agregarPantalla("Vehículos", new PanelVehiculos(sistema));
+        agregarPantalla("Estaciones", new PanelEstaciones(sistema));
+        agregarPantalla("Reportes", new PanelReportes(sistema));
 
         // Al cerrar la ventana se guardan los datos
         addWindowListener(new WindowAdapter() {
