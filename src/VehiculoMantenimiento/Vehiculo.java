@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import EstacionesTraslados.Estacion;
-import Excepciones.VehiculoNoDisponibleExcepcion;
 
 // Vehículo del servicio. Es abstracta: cada tipo (bicicleta común, bicicleta eléctrica
 // o monopatín) define su tipo y sus datos propios.
@@ -44,10 +43,7 @@ public abstract class Vehiculo implements Comparable<Vehiculo>, Serializable {
         return estado == EstadoVehiculo.DISPONIBLE;
     }
 
-    public void marcarEnUso() {
-        if (!puedeRetirarse()) {
-            throw new VehiculoNoDisponibleExcepcion("El vehículo " + codigo + " no está disponible (" + estado + ")");
-        }
+        public void marcarEnUso() {
         estado = EstadoVehiculo.EN_USO;
     }
 

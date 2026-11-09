@@ -2,40 +2,31 @@ package ViajesTarifas;
 
 import java.time.LocalDate;
 
-// RN21 + S6: el primer viaje del usuario es gratis hasta 15 minutos (desbloqueo incluido).
+// RN21 y S6: el primer viaje del usuario es gratis hasta 15 minutos (desbloqueo incluido).
 // Los minutos que pasan de 15 se cobran a la tarifa normal.
+
 public class PromoPrimerViaje extends Promocion {
+    private static final long serialVersionUID = 1L;
     public static final int MINUTOS_GRATIS = 15;
 
     public PromoPrimerViaje(String nombre, LocalDate fechaInicio, LocalDate fechaFin) {
         super(nombre, fechaInicio, fechaFin);
     }
 
+    // Aplica si el usuario no terminó ningún otro viaje antes de este
     @Override
-    public boolean esAplicable(Viaje v) {
-        return v.getEstado() == EstadoViaje.FINALIZADO
-                && estaVigente(v.getInicio().toLocalDate())
-                && !tuvoViajesAnteriores(v);
-    }
-
-    // true si el usuario ya había terminado otro viaje antes de este
-    private boolean tuvoViajesAnteriores(Viaje v) {
-        for (Viaje otro : v.getUsuario().getViajes()) {
-            if (otro != v
-                    && otro.getEstado() == EstadoViaje.FINALIZADO
-                    && otro.getInicio().isBefore(v.getInicio())) {
-                return true;
+    public boolean esAplicable(Viaje viaje) {
+        for (Viaje otro : viaje.getUsuario().getViajes()) {
+            if (otro != viaje && otro.getEstado() == EstadoViaje.FINALIZADO) {
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     @Override
-    public double calcularDescuento(Viaje v) {
-        if (!esAplicable(v)) {
-            return 0.0;
-        }
-        int minutosGratis = Math.min(v.getMinutosCobrables(), MINUTOS_GRATIS);
-        return v.getTarifa().calcularCosto(minutosGratis);
+    public double calcularDescuento(Viaje viaje) {
+        int minutosGratis = Math.min(viaje.getDuracionMinutos(), MINUTOS_GRATIS);
+        return viaje.getTarifa().calcularCosto(minutosGratis);
     }
 }

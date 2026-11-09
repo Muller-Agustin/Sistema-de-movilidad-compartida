@@ -1,6 +1,8 @@
 package ViajesTarifas;
 
+import java.io.Serializable;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,96 +13,101 @@ import Excepciones.EstacionLlenaExcepcion;
 import UsuariosCuenta.Usuario;
 import VehiculoMantenimiento.Vehiculo;
 
-public class Viaje {
-    private static final int LIMITE_CANCELACION_MINUTOS = 2;
-    private static final int LIMITE_PERDIDA_HORAS = 24;
-    private static final int GRACIA_ESTACION_LLENA_MINUTOS = 10;
+// Viaje de un usuario con un vehículo: empieza al retirarlo en una estación y termina al
+// devolverlo. Experto (GRASP): calcula su duración, su distancia y su importe.
 
-    private final LocalDateTime inicio;
+public class Viaje implements Serializable {
+    private static final long serialVersionUID = 1L;
+    public static final int LIMITE_CANCELACION_MINUTOS = 2;     // RN18
+    public static final int LIMITE_PERDIDA_HORAS = 24;          // RN20
+    public static final int MINUTOS_EXTRA_ESTACION_LLENA = 10;  // RN15
+    public static final double CARGO_VEHICULO_PERDIDO = 20000;  // RN20 y S4
+
+    private int numero;
+    private Usuario usuario;
+    private Vehiculo vehiculo;
+    private Tarifa tarifa;
+    private Estacion retiro;
+    private Estacion devolucion;
+    private LocalDateTime inicio;
     private LocalDateTime fin;
     private EstadoViaje estado;
-    private final Usuario usuario;
-    private final List<PuntoRecorrido> puntosRecorrido;
-    private final List<NotaAjuste> notasAjuste;
-    private final Vehiculo vehiculo;
-    private final Tarifa tarifa;
+    private List<PuntoRecorrido> puntosRecorrido;
+    private List<NotaAjuste> notasAjuste;
     private Promocion promocion;
-    private final Estacion retiro;
-    private Estacion devolucion;
+    private double descuento;
+    private double importe;
     private LocalDateTime intentoFallidoDevolucion;
-    private double importeCobrado;
 
-    public Viaje(Usuario usuario, Vehiculo vehiculo, Tarifa tarifa, Estacion retiro, LocalDateTime inicio) {
+    public Viaje(int numero, Usuario usuario, Vehiculo vehiculo, Estacion retiro, Tarifa tarifa, LocalDateTime inicio) {
+        this.numero = numero;
         this.usuario = usuario;
         this.vehiculo = vehiculo;
-        this.tarifa = tarifa;
         this.retiro = retiro;
+        this.tarifa = tarifa;
         this.inicio = inicio;
         this.estado = EstadoViaje.EN_CURSO;
         this.puntosRecorrido = new ArrayList<>();
         this.notasAjuste = new ArrayList<>();
     }
 
-    // GETTERS
-    public LocalDateTime getInicio() { return inicio; }
-    public LocalDateTime getFin() { return fin; }
-    public EstadoViaje getEstado() { return estado; }
-    public Usuario getUsuario() { return usuario; }
-    public List<PuntoRecorrido> getPuntosRecorrido() { return List.copyOf(puntosRecorrido); }
-    public List<NotaAjuste> getNotasAjuste() { return List.copyOf(notasAjuste); }
-    public Vehiculo getVehiculo() { return vehiculo; }
-    public Tarifa getTarifa() { return tarifa; }
-    public Promocion getPromocion() { return promocion; }
-    public Estacion getRetiro() { return retiro; }
-    public Estacion getDevolucion() { return devolucion; }
-    public double getImporteCobrado() { return importeCobrado; }
-    public LocalDateTime getIntentoFallidoDevolucion() { return intentoFallidoDevolucion; }
-
-    // SETTERS
-    public void setPromocion(Promocion promocion) { this.promocion = promocion; }
-    public void agregarNotaAjuste(NotaAjuste nota) { notasAjuste.add(nota); }
-
-    // el servicio guarda acá cuánto se le cobró al usuario por este viaje (RN24: no se modifica después)
-    public void registrarCobro(double importe) {
-        if (estado == EstadoViaje.EN_CURSO) {
-            throw new IllegalStateException("El viaje todavía está en curso");
-        }
-        this.importeCobrado = importe;
+    // Mientras el viaje está en curso se registran los puntos del recorrido
+    public void registrarPunto(Coordenada coordenada, LocalDateTime hora) {
+        puntosRecorrido.add(new PuntoRecorrido(coordenada, hora));
     }
 
-    // Lo usa la persistencia al cargar un viaje ya guardado: deja el viaje como estaba,
-    // sin volver a ejecutar las reglas ni mover el vehículo o las estaciones.
-    public void restaurarEstado(EstadoViaje estado, LocalDateTime fin, Estacion devolucion,
-                                LocalDateTime intentoFallidoDevolucion, double importeCobrado) {
-        this.estado = estado;
-        this.fin = fin;
-        this.devolucion = devolucion;
-        this.intentoFallidoDevolucion = intentoFallidoDevolucion;
-        this.importeCobrado = importeCobrado;
+    // RN15: el usuario encontró la estación llena. Desde este momento tiene 10 minutos
+    // sin cargo para llegar a otra estación. Solo cuenta el primer intento.
+    public void otorgarMinutosExtra(LocalDateTime hora) {
+        if (intentoFallidoDevolucion == null) {
+            intentoFallidoDevolucion = hora;
+        }
     }
 
-    // S10 + S8: minutos del viaje redondeados hacia arriba (10 min y 1 segundo se cobran como 11).
-    // Si el usuario encontró la estación llena, hasta 10 minutos desde ese intento no se cobran.
-    public int getMinutosCobrables() {
-        if (fin == null) {
-            throw new IllegalStateException("El viaje todavía no terminó");
+    // RF08: cierra el viaje en la estación de devolución y suma los km al vehículo
+    public void finalizar(Estacion estacion, LocalDateTime horaFin) {
+        this.devolucion = estacion;
+        this.fin = horaFin;
+        this.estado = EstadoViaje.FINALIZADO;
+        vehiculo.sumarKm(getDistanciaKm());
+    }
+
+    // RN23: de las promociones vigentes y aplicables, elige la que más descuenta (no se acumulan)
+    public void aplicarMejorPromocion(List<Promocion> promociones) {
+        LocalDate fecha = inicio.toLocalDate();
+        for (Promocion p : promociones) {
+            if (p.estaVigente(fecha) && p.esAplicable(this)) {
+                double descuentoPromo = p.calcularDescuento(this);
+                if (descuentoPromo > descuento) {
+                    promocion = p;
+                    descuento = descuentoPromo;
+                }
+            }
         }
+        if (promocion != null) {
+            promocion.registrarUso(this);
+        }
+    }
+
+    // RN17 y RN19: costo según la tarifa, menos el descuento de la promoción elegida
+    public double calcularImporte() {
+        double importeBase = tarifa.calcularCosto(getDuracionMinutos());
+        importe = Math.max(0, importeBase - descuento);
+        return importe;
+    }
+
+    // Minutos a cobrar, redondeados hacia arriba (S10: 10 min y 1 segundo se cobran 11).
+    // RN15: si el usuario encontró una estación llena, hasta 10 minutos desde ese intento no se cobran.
+    public int getDuracionMinutos() {
         long segundos = Duration.between(inicio, fin).getSeconds();
-        segundos -= segundosDeGracia();
+        if (intentoFallidoDevolucion != null) {
+            long segundosExtra = Duration.between(intentoFallidoDevolucion, fin).getSeconds();
+            segundos -= Math.min(segundosExtra, MINUTOS_EXTRA_ESTACION_LLENA * 60);
+        }
         return (int) ((segundos + 59) / 60);
     }
 
-    // RN15: segundos sin cargo por haber encontrado la estación llena (máximo 10 minutos)
-    private long segundosDeGracia() {
-        if (intentoFallidoDevolucion == null) {
-            return 0;
-        }
-        long desdeElIntento = Duration.between(intentoFallidoDevolucion, fin).getSeconds();
-        return Math.min(GRACIA_ESTACION_LLENA_MINUTOS * 60L, Math.max(0, desdeElIntento));
-    }
-
-    // S18: kilómetros del recorrido, sumando los tramos entre la estación de retiro, los puntos
-    // registrados y la estación de devolución (si ya se devolvió)
+    // S18: km del recorrido, sumando los tramos entre el retiro, los puntos y la devolución
     public double getDistanciaKm() {
         double total = 0;
         Coordenada anterior = retiro.getCoordenada();
@@ -114,69 +121,89 @@ public class Viaje {
         return total;
     }
 
-    // valida que el viaje siga en curso
-    private void validarEnCurso() {
-        if (estado != EstadoViaje.EN_CURSO) {
-            throw new IllegalStateException("El viaje no está en curso");
-        }
-    }
-
-    // guarda un punto del recorrido mientras el viaje sigue en curso, se ejecuta cada segundo
-    public void registrarPunto(Coordenada c, LocalDateTime hora) {
-        validarEnCurso();
-        puntosRecorrido.add(new PuntoRecorrido(c, hora));
-    }
-
-    // cierra el viaje y deja el vehiculo en la estacion de devolucion (RN13, RN15, RF08).
-    // Si la estación está llena, anota el primer intento fallido y lanza una excepción.
-    public void finalizar(Estacion estacion, LocalDateTime fin) throws EstacionLlenaExcepcion {
-        validarEnCurso();
-        if (fin.isBefore(inicio)) {
-            throw new IllegalArgumentException("El viaje no puede terminar antes de empezar");
-        }
-        if (estacion.estaLlena()) {
-            if (intentoFallidoDevolucion == null) {
-                intentoFallidoDevolucion = fin;
-            }
-            throw new EstacionLlenaExcepcion("La estación " + estacion.getCodigo() + " está llena");
-        }
-        this.fin = fin;
-        this.devolucion = estacion;
-        this.estado = EstadoViaje.FINALIZADO;
-        vehiculo.sumarKm(getDistanciaKm());
-        vehiculo.marcarDisponible();
-        estacion.recibirVehiculo(vehiculo, fin);
-    }
-
-    // RN18: solo se cancela dentro de los 2 minutos y el vehiculo vuelve a la estación de retiro
+    // RN18: solo se cancela dentro de los 2 minutos; el vehículo vuelve a la estación de retiro sin cargo
     public void cancelar(LocalDateTime ahora) throws EstacionLlenaExcepcion {
-        validarEnCurso();
-        long segundos = Duration.between(inicio, ahora).getSeconds();
-        if (segundos > LIMITE_CANCELACION_MINUTOS * 60L) {
+        if (Duration.between(inicio, ahora).toMinutes() >= LIMITE_CANCELACION_MINUTOS) {
             throw new IllegalStateException("Pasaron más de " + LIMITE_CANCELACION_MINUTOS + " minutos: el viaje no se puede cancelar");
         }
-        if (retiro.estaLlena()) {
-            throw new EstacionLlenaExcepcion("La estación " + retiro.getCodigo() + " está llena");
-        }
-        this.fin = ahora;
-        this.estado = EstadoViaje.CANCELADO;
-        vehiculo.marcarDisponible();
         retiro.recibirVehiculo(vehiculo, ahora);
+        vehiculo.marcarDisponible();
+        fin = ahora;
+        estado = EstadoViaje.CANCELADO;
     }
 
-    // true si el viaje sigue abierto pasadas las 24 horas
+    // RN20: true si el viaje sigue abierto después de 24 horas
     public boolean superaLimitePerdida(LocalDateTime ahora) {
-        return estado == EstadoViaje.EN_CURSO
-                && Duration.between(inicio, ahora).toHours() >= LIMITE_PERDIDA_HORAS;
+        return estado == EstadoViaje.EN_CURSO && Duration.between(inicio, ahora).toHours() >= LIMITE_PERDIDA_HORAS;
     }
 
-    // RN20 + S2: el vehículo no volvió en 24 horas, se lo da por perdido y queda fuera de servicio
+    // RN20 y S2: el vehículo se da por perdido, queda fuera de servicio y se cobra un cargo fijo
     public void marcarPerdido(LocalDateTime ahora) {
-        validarEnCurso();
-        if (!superaLimitePerdida(ahora)) {
-            throw new IllegalStateException("El viaje todavía no superó las " + LIMITE_PERDIDA_HORAS + " horas");
-        }
-        this.estado = EstadoViaje.PERDIDO;
+        fin = ahora;
+        estado = EstadoViaje.PERDIDO;
+        importe = CARGO_VEHICULO_PERDIDO;
         vehiculo.darDeBaja();
+    }
+
+    // RN24: el viaje cerrado no se modifica; la corrección queda en una nota aparte
+    public void agregarNotaAjuste(NotaAjuste nota) {
+        notasAjuste.add(nota);
+    }
+
+    public int getNumero() {
+        return numero;
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
+    }
+
+    public Vehiculo getVehiculo() {
+        return vehiculo;
+    }
+
+    public Tarifa getTarifa() {
+        return tarifa;
+    }
+
+    public Estacion getRetiro() {
+        return retiro;
+    }
+
+    public Estacion getDevolucion() {
+        return devolucion;
+    }
+
+    public LocalDateTime getInicio() {
+        return inicio;
+    }
+
+    public LocalDateTime getFin() {
+        return fin;
+    }
+
+    public EstadoViaje getEstado() {
+        return estado;
+    }
+
+    public List<PuntoRecorrido> getPuntosRecorrido() {
+        return puntosRecorrido;
+    }
+
+    public List<NotaAjuste> getNotasAjuste() {
+        return notasAjuste;
+    }
+
+    public Promocion getPromocion() {
+        return promocion;
+    }
+
+    public double getImporte() {
+        return importe;
+    }
+
+    @Override
+    public String toString() {
+        return "Viaje " + numero + " - " + usuario.getNombre() + " - " + vehiculo.getCodigo() + " - " + estado;
     }
 }
