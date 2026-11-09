@@ -1,5 +1,6 @@
 package UsuariosCuenta;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -13,59 +14,29 @@ import VehiculoMantenimiento.Vehiculo;
 import ViajesTarifas.EstadoViaje;
 import ViajesTarifas.Viaje;
 
-public class Usuario implements Reportante {
+// Persona registrada en el servicio. Tiene una cuenta con saldo, puede tener plan mensual
+// y guarda su historial de viajes. Experto (GRASP): decide por sí mismo si puede retirar.
+
+public class Usuario implements Reportante, Serializable {
+    private static final long serialVersionUID = 1L;
     private String nombre;
-    private final String documento;
+    private String documento;
     private String email;
-    private final LocalDate fechaAlta;
-    private EstadoUsuario estado;
-    private final Cuenta cuenta;
+    private LocalDate fechaAlta;
+    private boolean habilitado;
+    private Cuenta cuenta;
     private PlanMensual planMensual;
-    private final List<Viaje> viajes;
+    private List<Viaje> viajes;
 
     // RF01: el usuario se crea habilitado y con saldo 0
     public Usuario(String nombre, String documento, String email, LocalDate fechaAlta) {
-        if (nombre == null || nombre.isBlank()) {
-            throw new IllegalArgumentException("El nombre es obligatorio");
-        }
-        if (documento == null || documento.isBlank()) {
-            throw new IllegalArgumentException("El documento es obligatorio");
-        }
-        if (email == null || !email.contains("@")) {
-            throw new IllegalArgumentException("El correo electrónico no es válido");
-        }
-        if (fechaAlta == null) {
-            throw new IllegalArgumentException("La fecha de alta es obligatoria");
-        }
         this.nombre = nombre;
         this.documento = documento;
         this.email = email;
         this.fechaAlta = fechaAlta;
-        this.estado = EstadoUsuario.HABILITADO;
-        this.cuenta = new Cuenta(0);
+        this.habilitado = true;
+        this.cuenta = new Cuenta();
         this.viajes = new ArrayList<>();
-    }
-
-    // GETTERS
-    public String getNombre() { return nombre; }
-    public String getDocumento() { return documento; }
-    public String getEmail() { return email; }
-    public LocalDate getFechaAlta() { return fechaAlta; }
-    public EstadoUsuario getEstado() { return estado; }
-    public Cuenta getCuenta() { return cuenta; }
-    public PlanMensual getPlanMensual() { return planMensual; }
-    public List<Viaje> getViajes() { return List.copyOf(viajes); }
-
-    // SETTERS
-    public void setNombre(String nombre) { this.nombre = nombre; }
-    public void setEmail(String email) { this.email = email; }
-
-    public void agregarViaje(Viaje viaje) {
-        viajes.add(viaje);
-    }
-
-    public boolean estaHabilitado() {
-        return estado == EstadoUsuario.HABILITADO;
     }
 
     public boolean tieneViajeEnCurso() {
@@ -77,52 +48,47 @@ public class Usuario implements Reportante {
         return false;
     }
 
-    // RN01, RN02 y RN04: true si cumple las tres condiciones para retirar
-    public boolean puedeRetirar(double minimo) {
-        return estaHabilitado() && !tieneViajeEnCurso() && cuenta.tieneSaldoSuficiente(minimo);
-    }
-
-    // igual que puedeRetirar, pero explica con una excepción cuál regla no se cumple
-    public void validarRetiro(double minimo) {
-        if (!estaHabilitado()) {
+    // RN01, RN02 y RN04: si alguna regla no se cumple, lanza la excepción con el motivo
+    public void validarRetiro(double saldoMinimo) throws RetiroNoPermitidoExcepcion {
+        if (!habilitado) {
             throw new RetiroNoPermitidoExcepcion("El usuario está inhabilitado hasta regularizar su saldo");
         }
         if (tieneViajeEnCurso()) {
             throw new RetiroNoPermitidoExcepcion("El usuario ya tiene un viaje en curso");
         }
-        if (!cuenta.tieneSaldoSuficiente(minimo)) {
-            throw new RetiroNoPermitidoExcepcion("Saldo insuficiente: se necesitan al menos $" + minimo);
+        if (!cuenta.tieneSaldoSuficiente(saldoMinimo)) {
+            throw new RetiroNoPermitidoExcepcion("Saldo insuficiente: se necesitan al menos $" + saldoMinimo);
         }
     }
 
-    // RF03 + S12: al recargar y dejar el saldo en cero o más, el usuario se rehabilita
+    public void agregarViaje(Viaje viaje) {
+        viajes.add(viaje);
+    }
+
+    // RF03: si la recarga deja el saldo en cero o más, el usuario se vuelve a habilitar
     public void recargarSaldo(double importe, MedioPago medio, LocalDateTime fecha) {
         cuenta.recargar(importe, medio, fecha);
-        actualizarEstado();
+        actualizarHabilitacion();
     }
 
-    // RN03: si después de cobrar el saldo queda negativo, el usuario se inhabilita
+    // RN03: si después de cobrar el saldo queda negativo, el usuario queda inhabilitado
     public void cobrar(double importe, String concepto, LocalDateTime fecha) {
         cuenta.debitar(importe, concepto, fecha);
-        actualizarEstado();
+        actualizarHabilitacion();
     }
 
-    // S16: un ajuste del operador (crédito o débito) también puede habilitar o inhabilitar al usuario
+    // RN24: el ajuste del operador también puede habilitar o inhabilitar al usuario
     public void ajustarSaldo(double importe, String motivo, LocalDateTime fecha) {
         cuenta.ajustar(importe, motivo, fecha);
-        actualizarEstado();
+        actualizarHabilitacion();
     }
 
-    private void actualizarEstado() {
-        if (cuenta.getSaldo() < 0) {
-            estado = EstadoUsuario.INHABILITADO;
-        } else {
-            estado = EstadoUsuario.HABILITADO;
-        }
+    private void actualizarHabilitacion() {
+        habilitado = cuenta.getSaldo() >= 0;
     }
 
-    // RF05: cobra el precio del plan (S15) y lo deja activo
-    public void suscribirPlan(LocalDateTime fecha) {
+    // RF05: cobra el precio del plan y lo deja activo
+    public void suscribirPlan(LocalDateTime fecha) throws SaldoInsuficienteExcepcion {
         if (planMensual != null) {
             throw new IllegalStateException("El usuario ya tiene un plan mensual");
         }
@@ -133,17 +99,9 @@ public class Usuario implements Reportante {
         planMensual = new PlanMensual(fecha.toLocalDate());
     }
 
-    // Lo usa la persistencia al cargar un usuario que ya tenía plan: no vuelve a cobrar la suscripción.
-    public void restaurarPlanMensual(PlanMensual plan) {
-        this.planMensual = plan;
-    }
-
-    // RF18: el usuario también puede reportar fallas.
+    // RF18: el usuario también puede reportar una falla
     @Override
     public ReporteFalla reportarFalla(Vehiculo vehiculo, String descripcion, LocalDate fecha) {
-        if (vehiculo == null || descripcion == null || descripcion.isBlank() || fecha == null) {
-            throw new IllegalArgumentException("El vehículo, la descripción y la fecha son obligatorios");
-        }
         ReporteFalla reporte = new ReporteFalla(vehiculo, this, fecha, descripcion);
         vehiculo.agregarReporte(reporte);
         return reporte;
@@ -152,5 +110,42 @@ public class Usuario implements Reportante {
     @Override
     public String getIdentificacion() {
         return "Usuario " + nombre + " (documento " + documento + ")";
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public String getDocumento() {
+        return documento;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public LocalDate getFechaAlta() {
+        return fechaAlta;
+    }
+
+    public boolean isHabilitado() {
+        return habilitado;
+    }
+
+    public Cuenta getCuenta() {
+        return cuenta;
+    }
+
+    public PlanMensual getPlanMensual() {
+        return planMensual;
+    }
+
+    public List<Viaje> getViajes() {
+        return viajes;
+    }
+
+    @Override
+    public String toString() {
+        return nombre + " (" + documento + ")";
     }
 }

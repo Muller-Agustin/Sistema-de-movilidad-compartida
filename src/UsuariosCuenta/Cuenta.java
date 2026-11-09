@@ -1,32 +1,28 @@
 package UsuariosCuenta;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Cuenta {
-    private double saldo;
-    private final List<Movimiento> movimientos;
-    private final List<MedioPago> mediosPago;
+// Cuenta del usuario: saldo, medios de pago y el historial de movimientos.
+// El saldo solo cambia a través de un movimiento, así el historial siempre explica el saldo.
 
-    public Cuenta(double saldo) {
-        this.saldo = saldo;
+public class Cuenta implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private double saldo;
+    private List<Movimiento> movimientos;
+    private List<MedioPago> mediosPago;
+
+    public Cuenta() {
+        this.saldo = 0;
         this.movimientos = new ArrayList<>();
         this.mediosPago = new ArrayList<>();
     }
 
-    public double getSaldo() { return saldo; }
-    public List<Movimiento> getMovimientos() { return List.copyOf(movimientos); }
-    public List<MedioPago> getMediosPago() { return List.copyOf(mediosPago); }
-
-    // RF02: agrega un medio de pago si todavía no está registrado
+    // RF02
     public void agregarMedioPago(MedioPago medio) {
-        if (medio == null) {
-            throw new IllegalArgumentException("El medio de pago es obligatorio");
-        }
-        if (!mediosPago.contains(medio)) {
-            mediosPago.add(medio);
-        }
+        mediosPago.add(medio);
     }
 
     // RF03: solo se puede recargar con un medio de pago ya registrado
@@ -37,12 +33,12 @@ public class Cuenta {
         registrar(new Recarga(fecha, importe, medio));
     }
 
-    // El saldo puede quedar negativo (RN03): el estado del usuario se decide en Usuario
+    // RN03: el saldo puede quedar negativo; qué pasa con el usuario lo decide Usuario
     public void debitar(double importe, String concepto, LocalDateTime fecha) {
         registrar(new Debito(fecha, importe, concepto));
     }
 
-    // S16: corrección con crédito (importe positivo) o débito (importe negativo)
+    // RN24: ajuste del operador
     public void ajustar(double importe, String motivo, LocalDateTime fecha) {
         registrar(new Ajuste(fecha, importe, motivo));
     }
@@ -51,9 +47,20 @@ public class Cuenta {
         return saldo >= minimo;
     }
 
-    // el saldo solo cambia a través de un movimiento, así el historial siempre explica el saldo
     private void registrar(Movimiento movimiento) {
         saldo += movimiento.getEfectoSobreSaldo();
         movimientos.add(movimiento);
+    }
+
+    public double getSaldo() {
+        return saldo;
+    }
+
+    public List<Movimiento> getMovimientos() {
+        return movimientos;
+    }
+
+    public List<MedioPago> getMediosPago() {
+        return mediosPago;
     }
 }

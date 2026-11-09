@@ -1,10 +1,11 @@
 package UsuariosCuenta;
 
-// RF02: medio con el que el usuario recarga saldo. S13: se simula, no hay integración real.
-public abstract class MedioPago {
+import java.io.Serializable;
 
-    protected MedioPago() {
-    }
+// RF02: medio con el que el usuario recarga saldo. El pago se simula, no hay integración real.
+
+public abstract class MedioPago implements Serializable {
+    private static final long serialVersionUID = 1L;
 
     public abstract String getDescripcion();
 }

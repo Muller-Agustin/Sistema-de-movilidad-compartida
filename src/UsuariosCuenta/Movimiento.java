@@ -1,37 +1,37 @@
 package UsuariosCuenta;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-// Un movimiento de la cuenta del usuario (RF04). Ordenados por fecha (orden natural).
-public abstract class Movimiento implements Comparable<Movimiento> {
-    private final LocalDateTime fecha;
-    private final double importe;
-    private final String concepto;
+// RF04: movimiento de la cuenta del usuario (recarga, débito o ajuste).
 
-    protected Movimiento(LocalDateTime fecha, double importe, String concepto) {
-        if (fecha == null) {
-            throw new IllegalArgumentException("La fecha es obligatoria");
-        }
-        if (concepto == null || concepto.isBlank()) {
-            throw new IllegalArgumentException("El concepto es obligatorio");
-        }
+public abstract class Movimiento implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private LocalDateTime fecha;
+    private double importe;
+    private String concepto;
+
+    public Movimiento(LocalDateTime fecha, double importe, String concepto) {
         this.fecha = fecha;
         this.importe = importe;
         this.concepto = concepto;
     }
 
-    // Cuánto suma (+) o resta (-) este movimiento al saldo. Cada tipo lo define a su manera.
+    // Polimorfismo (GRASP): cada tipo de movimiento decide si suma o resta al saldo.
     public abstract double getEfectoSobreSaldo();
 
     public abstract String getTipo();
 
-    public LocalDateTime getFecha() { return fecha; }
-    public double getImporte() { return importe; }
-    public String getConcepto() { return concepto; }
+    public LocalDateTime getFecha() {
+        return fecha;
+    }
 
-    @Override
-    public int compareTo(Movimiento otro) {
-        return fecha.compareTo(otro.fecha);
+    public double getImporte() {
+        return importe;
+    }
+
+    public String getConcepto() {
+        return concepto;
     }
 
     @Override

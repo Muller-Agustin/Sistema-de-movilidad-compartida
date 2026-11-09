@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import Excepciones.RetiroNoPermitidoExcepcion;
 import EstacionesTraslados.Estacion;
 import PersonalServicio.Operador;
 import UsuariosCuenta.Usuario;
@@ -26,8 +27,7 @@ public class ServicioViajes {
     }
 
     // RF06: el usuario retira un vehículo de una estación y empieza un viaje
-    public Viaje retirar(Usuario usuario, Vehiculo vehiculo, Estacion estacion) {
-        if (vehiculo.getEstacion() != estacion) {
+    public Viaje retirar(Usuario usuario, Vehiculo vehiculo, Estacion estacion) throws RetiroNoPermitidoExcepcion {        if (vehiculo.getEstacion() != estacion) {
             throw new IllegalArgumentException("El vehículo " + vehiculo.getCodigo() + " no está en la estación " + estacion.getCodigo());
         }
         if (vehiculo.getEstado() != EstadoVehiculo.DISPONIBLE) {
