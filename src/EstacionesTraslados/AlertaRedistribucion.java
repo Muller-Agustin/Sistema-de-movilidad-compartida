@@ -1,11 +1,15 @@
 package EstacionesTraslados;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class AlertaRedistribucion {
-    private final Estacion estacion;
-    private final TipoAlerta tipo;
-    private final LocalDateTime fecha;
+// RN16: aviso para el operador de que una estación quedó casi vacía o casi llena.
+
+public class AlertaRedistribucion implements Serializable {
+    private static final long serialVersionUID = 1L;
+    private Estacion estacion;
+    private TipoAlerta tipo;
+    private LocalDateTime fecha;
 
     public AlertaRedistribucion(Estacion estacion, TipoAlerta tipo, LocalDateTime fecha) {
         this.estacion = estacion;
@@ -23,5 +27,10 @@ public class AlertaRedistribucion {
 
     public LocalDateTime getFecha() {
         return fecha;
+    }
+
+    @Override
+    public String toString() {
+        return fecha + " - estación " + estacion.getCodigo() + " " + tipo;
     }
 }

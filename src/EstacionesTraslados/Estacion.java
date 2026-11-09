@@ -1,60 +1,51 @@
 package EstacionesTraslados;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import Excepciones.EstacionLlenaExcepcion;
 import VehiculoMantenimiento.Vehiculo;
 
-public class Estacion {
+// Punto fijo donde se retiran y devuelven los vehículos. Tiene una capacidad máxima
+// y genera alertas de redistribución según su ocupación.
+
+public class Estacion implements Serializable {
+    private static final long serialVersionUID = 1L;
     private static final double OCUPACION_MINIMA = 20;
     private static final double OCUPACION_MAXIMA = 90;
 
-    private final String codigo;
-    private final String direccion;
-    private final int capacidadMaxima;
-    private final Coordenada coordenada;
-    private final List<Vehiculo> vehiculos;
-    private final List<AlertaRedistribucion> alertasRedistribucion;
+    private String codigo;
+    private String direccion;
+    private int capacidadMaxima;
+    private Coordenada coordenada;
+    private List<Vehiculo> vehiculos;
+    private List<AlertaRedistribucion> alertas;
     private TipoAlerta alertaActiva;
 
     public Estacion(String codigo, String direccion, int capacidadMaxima, Coordenada coordenada) {
-        if (codigo == null || codigo.isBlank()) {
-            throw new IllegalArgumentException("El código es obligatorio");
-        }
-        if (capacidadMaxima <= 0) {
-            throw new IllegalArgumentException("La capacidad debe ser mayor a cero");
-        }
-        if (coordenada == null) {
-            throw new IllegalArgumentException("La coordenada es obligatoria");
-        }
         this.codigo = codigo;
         this.direccion = direccion;
         this.capacidadMaxima = capacidadMaxima;
         this.coordenada = coordenada;
         this.vehiculos = new ArrayList<>();
-        this.alertasRedistribucion = new ArrayList<>();
+        this.alertas = new ArrayList<>();
     }
 
-    // GETTERS
-    public String getCodigo() { return codigo; }
-    public String getDireccion() { return direccion; }
-    public int getCapacidadMaxima() { return capacidadMaxima; }
-    public Coordenada getCoordenada() { return coordenada; }
-    public List<Vehiculo> getVehiculos() { return List.copyOf(vehiculos); }
-    public List<AlertaRedistribucion> getAlertasRedistribucion() { return List.copyOf(alertasRedistribucion); }
-
-    // true si ya no entran mas vehiculos
     public boolean estaLlena() {
         return vehiculos.size() >= capacidadMaxima;
     }
 
-    // porcentaje de vehiculos guardados sobre la capacidad
+    public int getLugaresLibres() {
+        return capacidadMaxima - vehiculos.size();
+    }
+
     public double getPorcentajeOcupacion() {
         return vehiculos.size() * 100.0 / capacidadMaxima;
     }
 
-    // vehículos que un usuario podría retirar ahora (RN07 y RN08)
+    // Vehículos que un usuario podría retirar ahora (RN07 y RN08)
     public List<Vehiculo> getVehiculosDisponibles() {
         List<Vehiculo> disponibles = new ArrayList<>();
         for (Vehiculo v : vehiculos) {
@@ -65,62 +56,66 @@ public class Estacion {
         return disponibles;
     }
 
-    public void recibirVehiculo(Vehiculo v) {
-        recibirVehiculo(v, LocalDateTime.now());
-    }
-
-    // guarda el vehiculo en la estacion si hay lugar
-    public void recibirVehiculo(Vehiculo v, LocalDateTime fecha) {
+    // RN13: no se puede dejar un vehículo en una estación llena
+    public void recibirVehiculo(Vehiculo v, LocalDateTime fecha) throws EstacionLlenaExcepcion {
         if (estaLlena()) {
-            throw new IllegalStateException("La estación está llena");
+            throw new EstacionLlenaExcepcion("La estación " + codigo + " está llena");
         }
         vehiculos.add(v);
         v.setEstacion(this);
         verificarOcupacion(fecha);
     }
 
-    public void liberarVehiculo(Vehiculo v) {
-        liberarVehiculo(v, LocalDateTime.now());
-    }
-
-    // saca el vehiculo de la estacion (retiro o traslado)
+    // Saca el vehículo de la estación (por un retiro o un traslado)
     public void liberarVehiculo(Vehiculo v, LocalDateTime fecha) {
         if (!vehiculos.remove(v)) {
-            throw new IllegalArgumentException("El vehículo no está en esta estación");
+            throw new IllegalArgumentException("El vehículo " + v.getCodigo() + " no está en la estación " + codigo);
         }
         v.setEstacion(null);
         verificarOcupacion(fecha);
     }
 
-    // Lo usa la persistencia al cargar los datos: guarda el vehículo sin generar alertas nuevas.
-    public void restaurarVehiculo(Vehiculo v) {
-        if (estaLlena()) {
-            throw new IllegalStateException("La estación " + codigo + " no tiene lugar para el vehículo " + v.getCodigo());
-        }
-        vehiculos.add(v);
-        v.setEstacion(this);
-        alertaActiva = zonaDeOcupacion();
-    }
-
-    // RN16 + S9: genera una alerta cuando la estación entra en zona de alerta (menos del 20% o más
-    // del 90%). Mientras siga en esa zona no repite la alerta: vuelve a avisar si sale y vuelve a entrar.
+    // RN16: genera una alerta cuando la estación entra en zona de alerta (menos del 20 %
+    // o más del 90 %). S9: mientras siga en esa zona no repite la alerta.
     private void verificarOcupacion(LocalDateTime fecha) {
-        TipoAlerta tipo = zonaDeOcupacion();
+        TipoAlerta tipo = null;
+        if (getPorcentajeOcupacion() < OCUPACION_MINIMA) {
+            tipo = TipoAlerta.VACIA;
+        } else if (getPorcentajeOcupacion() > OCUPACION_MAXIMA) {
+            tipo = TipoAlerta.SATURADA;
+        }
         if (tipo != null && tipo != alertaActiva) {
-            alertasRedistribucion.add(new AlertaRedistribucion(this, tipo, fecha));
+            alertas.add(new AlertaRedistribucion(this, tipo, fecha));
         }
         alertaActiva = tipo;
     }
 
-    // VACIA, SATURADA o null si la ocupación está en la zona normal
-    private TipoAlerta zonaDeOcupacion() {
-        double ocupacion = getPorcentajeOcupacion();
-        if (ocupacion < OCUPACION_MINIMA) {
-            return TipoAlerta.VACIA;
-        }
-        if (ocupacion > OCUPACION_MAXIMA) {
-            return TipoAlerta.SATURADA;
-        }
-        return null;
+    public String getCodigo() {
+        return codigo;
+    }
+
+    public String getDireccion() {
+        return direccion;
+    }
+
+    public int getCapacidadMaxima() {
+        return capacidadMaxima;
+    }
+
+    public Coordenada getCoordenada() {
+        return coordenada;
+    }
+
+    public List<Vehiculo> getVehiculos() {
+        return vehiculos;
+    }
+
+    public List<AlertaRedistribucion> getAlertas() {
+        return alertas;
+    }
+
+    @Override
+    public String toString() {
+        return codigo + " - " + direccion + " (" + vehiculos.size() + "/" + capacidadMaxima + ")";
     }
 }

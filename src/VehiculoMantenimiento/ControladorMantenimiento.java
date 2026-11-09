@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 import EstacionesTraslados.Estacion;
+import Excepciones.EstacionLlenaExcepcion;
 import Excepciones.OrdenIncompletaExcepcion;
 import PersonalServicio.Operador;
 import PersonalServicio.Tecnico;
@@ -32,7 +33,7 @@ public class ControladorMantenimiento implements Serializable {
 
     // RF11: recibe cualquier tipo de vehículo (LSP: una BicicletaComun o un Monopatin
     // se usan igual que un Vehiculo). Falla si el código se repite o la estación está llena.
-    public void registrarVehiculo(Vehiculo vehiculo, Estacion estacion) {
+    public void registrarVehiculo(Vehiculo vehiculo, Estacion estacion) throws EstacionLlenaExcepcion {
         if (buscarVehiculo(vehiculo.getCodigo()) != null) {
             throw new IllegalArgumentException("Ya existe un vehículo con el código " + vehiculo.getCodigo());
         }

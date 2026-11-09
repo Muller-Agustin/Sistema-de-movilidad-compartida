@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import Excepciones.EstacionLlenaExcepcion;
 import EstacionesTraslados.Estacion;
 import EstacionesTraslados.Traslado;
 import VehiculoMantenimiento.OrdenMantenimiento;
@@ -41,23 +42,23 @@ public class Operador extends Personal implements Reportante {
         return orden;
     }
 
-    // RF23: mueve vehículos de una estación a otra. Primero se controla todo, y recién
-    // después se mueve, así un traslado inválido no deja vehículos a medio camino.
-    public Traslado redistribuir(Estacion origen, Estacion destino, List<Vehiculo> vehiculos, LocalDateTime fecha) {
-        Traslado traslado = new Traslado(origen, destino, vehiculos, fecha, this);
+    // RF23: mueve vehículos de una estación a otra. Primero controla todo y recién
+    // después mueve, así un traslado inválido no deja vehículos a medio camino.
+    public Traslado redistribuir(Estacion origen, Estacion destino, List<Vehiculo> vehiculos, LocalDateTime fecha)
+            throws EstacionLlenaExcepcion {
         for (Vehiculo v : vehiculos) {
             if (!origen.getVehiculos().contains(v)) {
                 throw new IllegalArgumentException("El vehículo " + v.getCodigo() + " no está en la estación de origen");
             }
         }
-        int lugaresLibres = destino.getCapacidadMaxima() - destino.getVehiculos().size();
-        if (vehiculos.size() > lugaresLibres) {
-            throw new IllegalArgumentException("La estación de destino solo tiene " + lugaresLibres + " lugares libres");
+        if (vehiculos.size() > destino.getLugaresLibres()) {
+            throw new EstacionLlenaExcepcion("La estación " + destino.getCodigo() + " solo tiene "
+                    + destino.getLugaresLibres() + " lugares libres");
         }
         for (Vehiculo v : vehiculos) {
             origen.liberarVehiculo(v, fecha);
             destino.recibirVehiculo(v, fecha);
         }
-        return traslado;
+        return new Traslado(origen, destino, vehiculos, fecha, this);
     }
 }

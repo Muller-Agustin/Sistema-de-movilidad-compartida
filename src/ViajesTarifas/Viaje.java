@@ -129,7 +129,7 @@ public class Viaje {
 
     // cierra el viaje y deja el vehiculo en la estacion de devolucion (RN13, RN15, RF08).
     // Si la estación está llena, anota el primer intento fallido y lanza una excepción.
-    public void finalizar(Estacion estacion, LocalDateTime fin) {
+    public void finalizar(Estacion estacion, LocalDateTime fin) throws EstacionLlenaExcepcion {
         validarEnCurso();
         if (fin.isBefore(inicio)) {
             throw new IllegalArgumentException("El viaje no puede terminar antes de empezar");
@@ -149,7 +149,7 @@ public class Viaje {
     }
 
     // RN18: solo se cancela dentro de los 2 minutos y el vehiculo vuelve a la estación de retiro
-    public void cancelar(LocalDateTime ahora) {
+    public void cancelar(LocalDateTime ahora) throws EstacionLlenaExcepcion {
         validarEnCurso();
         long segundos = Duration.between(inicio, ahora).getSeconds();
         if (segundos > LIMITE_CANCELACION_MINUTOS * 60L) {

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import Excepciones.EstacionLlenaExcepcion;
 import Excepciones.RetiroNoPermitidoExcepcion;
 import EstacionesTraslados.Estacion;
 import PersonalServicio.Operador;
@@ -47,12 +48,12 @@ public class ServicioViajes {
     }
 
     // RF07 + RN18: cancelar dentro de los 2 minutos, sin cargo
-    public void cancelar(Viaje viaje) {
+    public void cancelar(Viaje viaje) throws EstacionLlenaExcepcion {
         viaje.cancelar(reloj.ahora());
     }
 
     // RF08 + RF10: devuelve el vehículo, cierra el viaje y cobra. Devuelve el importe cobrado.
-    public double devolver(Viaje viaje, Estacion estacion) {
+    public double devolver(Viaje viaje, Estacion estacion) throws EstacionLlenaExcepcion {
         LocalDateTime ahora = reloj.ahora();
         viaje.finalizar(estacion, ahora);                             // puede lanzar EstacionLlenaExcepcion
 
