@@ -28,7 +28,7 @@ participant "cuenta:Cuenta" as C
 participant "estacion:Estacion" as E
 participant "vehiculo:Vehiculo" as V
 
-A -> U: iniciarViaje(V, E, T)
+A -> U: iniciarViaje(numero, V, E, T, inicio)
 
 U -> U: estaHabilitado()
 U --> U: habilitado = true/false
@@ -63,7 +63,7 @@ else Usuario habilitado
         U -> J: Viaje(numero, U, V, E, T)
         U -> V: marcarEnUso()
         V --> U: estado = EN_USO
-        U -> E: liberarVehiculo(V)
+        U -> E: liberarVehiculo(V, inicio)
         E --> U: vehículo retirado de la estación
 
         note over U,E

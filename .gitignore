@@ -19,3 +19,6 @@ nbproject/
 # Sistema
 .DS_Store
 Thumbs.db
+
+# Datos que genera el programa al ejecutarse
+datos/

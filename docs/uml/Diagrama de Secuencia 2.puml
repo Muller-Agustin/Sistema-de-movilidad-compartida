@@ -29,7 +29,7 @@ participant "tarifa:Tarifa" as T
 participant "promocion:Promocion" as P
 participant "cuenta:Cuenta" as C
 
-A -> U: finalizarViaje(E, promociones)
+A -> U: finalizarViaje(E, promociones, horaFin)
 U -> E: estaLlena()
 E --> U: estacionLlena
 
@@ -38,7 +38,7 @@ alt Estación llena
   J --> U: 10 minutos adicionales sin cargo
   U --> A: No se registra la devolución; dirigirse a otra estación dentro de los 10 minutos extra
 else Estación con capacidad disponible
-  U -> E: recibirVehiculo(V)
+  U -> E: recibirVehiculo(V, horaFin)
   E --> U: vehículo recibido
   U -> V: marcarDisponible()
   V --> U: estado = DISPONIBLE
