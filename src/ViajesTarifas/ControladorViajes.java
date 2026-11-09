@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import EstacionesTraslados.Coordenada;
 import EstacionesTraslados.Estacion;
 import Excepciones.EstacionLlenaExcepcion;
 import Excepciones.RetiroNoPermitidoExcepcion;
@@ -76,6 +77,14 @@ public class ControladorViajes implements Serializable {
     // RF08: devuelve el vehículo y cobra. Devuelve el importe cobrado.
     public double devolver(Usuario usuario, Estacion estacion) throws EstacionLlenaExcepcion {
         return usuario.finalizarViaje(estacion, promociones, LocalDateTime.now());
+    }
+
+    // RF06: mientras el viaje está en curso se registran los puntos del recorrido
+    public void registrarPunto(Viaje viaje, Coordenada coordenada) {
+        if (viaje.getEstado() != EstadoViaje.EN_CURSO) {
+            throw new IllegalStateException("Solo se registran puntos en un viaje en curso");
+        }
+        viaje.registrarPunto(coordenada, LocalDateTime.now());
     }
 
     // RF07 y RN18: cancelar dentro de los 2 minutos, sin cargo
