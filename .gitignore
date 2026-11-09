@@ -1,0 +1,24 @@
+# Java
+*.class
+*.jar
+*.log
+out/
+bin/
+target/
+build/
+
+# IDEs
+.idea/
+*.iml
+.vscode/
+.classpath
+.project
+.settings/
+nbproject/
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Datos que genera el programa al ejecutarse
+datos/
