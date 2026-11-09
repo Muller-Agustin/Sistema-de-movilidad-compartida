@@ -1,12 +1,25 @@
 package modelo;
 
+import java.time.LocalDate;
+import modelo.vehiculos.VehiculoElectrico;
+
 public class BicicletaElectrica extends VehiculoElectrico {
-    public BicicletaElectrica(String codigo, EstadoVehiculo estado, int nivelBateria) {
-        super(codigo, estado, nivelBateria);
+    private final double autonomiaKm;
+
+    public BicicletaElectrica(String codigo, LocalDate fechaAlta, int nivelBateria, double autonomiaKm) {
+        super(codigo, fechaAlta, nivelBateria);
+        if (autonomiaKm <= 0) {
+            throw new IllegalArgumentException("La autonomía debe ser mayor a cero");
+        }
+        this.autonomiaKm = autonomiaKm;
     }
 
     @Override
     public TipoVehiculo getTipo() {
         return TipoVehiculo.BICICLETA_ELECTRICA;
+    }
+
+    public double getAutonomiaKm() {
+        return autonomiaKm;
     }
 }
