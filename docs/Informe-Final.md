@@ -23,11 +23,11 @@ El detalle completo está en [`cambios-diseno.md`](cambios-diseno.md).
 
 ## Distribución de tareas
 
-| Integrante | Etapa 1 | Etapa 2 |
-|---|---|---|
-| Müller, Agustín | Diagramas de secuencia | Vistas en Swing |
-| Evans Gonzales, Franco | Casos de Uso |  |
-| Cozzi Miranda, Franco | Diagramas de Clase | Modelado de Vehiculos |
+| Integrante | Etapa 1 | Etapa 2                                                               |
+|---|---|-----------------------------------------------------------------------|
+| Müller, Agustín | Diagramas de secuencia | Vistas en Swing                                                       |
+| Evans Gonzales, Franco | Casos de Uso | Modelos y controladores de los dominios ViajesTarifa y UsuariosCuenta |
+| Cozzi Miranda, Franco | Diagramas de Clase | Modelado de Vehiculos                                                 |
 
 ## Reflexión del grupo
 Este trabajo nos sirvió para comprender como se trabaja en grupo, en un proyecto grande. Aprendimos a dividir las tareas para poder ser más eficientes. Aprendimos a usar Git y Github de manera fluida. Esto nos sirvio para poder desarrollar partes separadas del trabajo para luego unir todo.
