@@ -36,15 +36,15 @@
 - **RF25:** Emitir reporte de viajes por usuario
 - **RF26:** Emitir reporte de vehículos con más fallas, con sus viajes y kilómetros recorridos
 - **RF27:** Emitir reporte de uso por estación (retiros y devoluciones)
-- **RF28:** Emitir reporte de reparaciones según vehículo y orden de mantenimiento cerrada
-- **RF29:** Consultar estaciones con vehículos disponibles ordenadas por cercanía
+- **RF28:** Emitir reporte de reparaciones según vehículo y orden de mantenimiento cerrada *(fuera de alcance)*
+- **RF29:** Consultar estaciones con vehículos disponibles ordenadas por cercanía *(fuera de alcance)*
 - **RF30:** Consultar el historial de viajes propio
 - **RF31:** Consultar las órdenes de mantenimiento abiertas asignadas a un técnico
 - **RF32:** Consultar las órdenes de mantenimiento cerradas de un técnico
-- **RF29:** Simular el avance del tiempo del sistema para verificar reglas temporales
-- **RF30:** Aplicar un descuento al devolver un vehículo en una estación con baja ocupación
-- **RF31:** Asignar automáticamente una orden de mantenimiento al técnico con menos órdenes abiertas
-- **RF32:** Exportar los reportes a un archivo CSV
+- **RF33:** Simular el avance del tiempo del sistema para verificar reglas temporales *(fuera de alcance)*
+- **RF34:** Aplicar un descuento al devolver un vehículo en una estación con baja ocupación *(fuera de alcance)*
+- **RF35:** Asignar automáticamente una orden de mantenimiento al técnico con menos órdenes abiertas
+- **RF36:** Exportar los reportes a un archivo CSV *(fuera de alcance)*
 
 ## Reglas de negocio (RN)
 

@@ -1,5 +1,4 @@
 @startuml diagrama_clases_inicial
-!pragma layout elk
 ' ============================================================
 '  TPO POO - Propuesta C: Sistema de movilidad compartida
 '  Diagrama de clases INICIAL (sin aplicar SOLID ni GRASP)
