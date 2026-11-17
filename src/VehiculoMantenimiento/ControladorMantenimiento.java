@@ -69,7 +69,7 @@ public class ControladorMantenimiento implements Serializable {
         return resultado;
     }
 
-    // RF27: reporte de vehículos con más fallas (orden personalizado con Comparator)
+    // RF26: reporte de vehículos con más fallas (orden personalizado con Comparator)
     public List<Vehiculo> listarVehiculosConMasFallas() {
         List<Vehiculo> lista = new ArrayList<>(vehiculos);
         lista.sort(new ComparadorVehiculosPorFallas());
@@ -163,14 +163,14 @@ public class ControladorMantenimiento implements Serializable {
     }
 
     public List<Vehiculo> getVehiculos() {
-        return vehiculos;
+        return Collections.unmodifiableList(vehiculos);
     }
 
     public List<Tecnico> getTecnicos() {
-        return tecnicos;
+        return Collections.unmodifiableList(tecnicos);
     }
 
     public List<OrdenMantenimiento> getOrdenes() {
-        return ordenes;
+        return Collections.unmodifiableList(ordenes);
     }
 }

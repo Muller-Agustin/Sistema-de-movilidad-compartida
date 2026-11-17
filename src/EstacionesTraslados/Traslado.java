@@ -3,6 +3,7 @@ package EstacionesTraslados;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import PersonalServicio.Operador;
@@ -35,7 +36,7 @@ public class Traslado implements Serializable {
     }
 
     public List<Vehiculo> getVehiculos() {
-        return vehiculos;
+        return Collections.unmodifiableList(vehiculos);
     }
 
     public LocalDateTime getFecha() {

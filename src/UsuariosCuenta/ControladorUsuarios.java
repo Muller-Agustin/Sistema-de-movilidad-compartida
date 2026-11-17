@@ -3,6 +3,7 @@ package UsuariosCuenta;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import Excepciones.SaldoInsuficienteExcepcion;
@@ -55,6 +56,6 @@ public class ControladorUsuarios implements Serializable {
     }
 
     public List<Usuario> getUsuarios() {
-        return usuarios;
+        return Collections.unmodifiableList(usuarios);
     }
 }

@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import EstacionesTraslados.Estacion;
@@ -185,7 +186,7 @@ public class Usuario implements Reportante, Serializable {
     }
 
     public List<Viaje> getViajes() {
-        return viajes;
+        return Collections.unmodifiableList(viajes);
     }
 
     @Override

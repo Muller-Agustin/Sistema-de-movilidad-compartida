@@ -14,7 +14,7 @@ import GeneralPersistencia.SistemaMovilidad;
 import PersonalServicio.Operador;
 import VehiculoMantenimiento.Vehiculo;
 
-// Pantalla de estaciones: alta (RF22), alertas de redistribución (RN16) y traslados (RF23).
+// Pantalla de estaciones: alta (RF15), alertas de redistribución (RN16) y traslados (RF23).
 
 public class PanelEstaciones extends PanelBase {
     private DefaultTableModel modeloEstaciones;
@@ -66,7 +66,7 @@ public class PanelEstaciones extends PanelBase {
         }
     }
 
-    // RF22
+    // RF15
     private void registrarEstacion() {
         JTextField campoCodigo = new JTextField();
         JTextField campoDireccion = new JTextField();

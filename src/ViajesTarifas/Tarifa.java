@@ -20,6 +20,12 @@ public class Tarifa implements Serializable {
     private LocalDate fechaVigencia;
 
     public Tarifa(TipoVehiculo tipoVehiculo, double cargoDesbloqueo, double precioPorMinuto, LocalDate fechaVigencia) {
+        if (tipoVehiculo == null || fechaVigencia == null) {
+            throw new IllegalArgumentException("La tarifa necesita tipo de vehículo y fecha de vigencia");
+        }
+        if (cargoDesbloqueo < 0 || precioPorMinuto < 0) {
+            throw new IllegalArgumentException("Los importes de la tarifa no pueden ser negativos");
+        }
         this.tipoVehiculo = tipoVehiculo;
         this.cargoDesbloqueo = cargoDesbloqueo;
         this.precioPorMinuto = precioPorMinuto;

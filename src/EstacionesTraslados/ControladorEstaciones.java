@@ -3,6 +3,7 @@ package EstacionesTraslados;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import Excepciones.EstacionLlenaExcepcion;
@@ -22,7 +23,7 @@ public class ControladorEstaciones implements Serializable {
         this.traslados = new ArrayList<>();
     }
 
-    // RF22: falla si el código ya existe
+    // RF15: falla si el código ya existe
     public void registrarEstacion(Estacion estacion) {
         if (buscarEstacion(estacion.getCodigo()) != null) {
             throw new IllegalArgumentException("Ya existe una estación con el código " + estacion.getCodigo());
@@ -58,10 +59,10 @@ public class ControladorEstaciones implements Serializable {
     }
 
     public List<Estacion> getEstaciones() {
-        return estaciones;
+        return Collections.unmodifiableList(estaciones);
     }
 
     public List<Traslado> getTraslados() {
-        return traslados;
+        return Collections.unmodifiableList(traslados);
     }
 }

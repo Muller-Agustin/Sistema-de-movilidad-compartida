@@ -3,6 +3,7 @@ package EstacionesTraslados;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import Excepciones.EstacionLlenaExcepcion;
@@ -25,6 +26,12 @@ public class Estacion implements Serializable {
     private TipoAlerta alertaActiva;
 
     public Estacion(String codigo, String direccion, int capacidadMaxima, Coordenada coordenada) {
+        if (capacidadMaxima <= 0) {
+            throw new IllegalArgumentException("La capacidad de la estación debe ser mayor a cero");
+        }
+        if (codigo == null || codigo.trim().isEmpty() || coordenada == null) {
+            throw new IllegalArgumentException("La estación necesita código y coordenadas");
+        }
         this.codigo = codigo;
         this.direccion = direccion;
         this.capacidadMaxima = capacidadMaxima;
@@ -107,11 +114,11 @@ public class Estacion implements Serializable {
     }
 
     public List<Vehiculo> getVehiculos() {
-        return vehiculos;
+        return Collections.unmodifiableList(vehiculos);
     }
 
     public List<AlertaRedistribucion> getAlertas() {
-        return alertas;
+        return Collections.unmodifiableList(alertas);
     }
 
     @Override

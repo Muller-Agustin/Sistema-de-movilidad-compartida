@@ -10,8 +10,8 @@ import UsuariosCuenta.Usuario;
 import VehiculoMantenimiento.Vehiculo;
 import ViajesTarifas.Viaje;
 
-// Pantalla de reportes del administrador: viajes por usuario (RF25), uso por estación (RF26)
-// y vehículos con más fallas (RF27).
+// Pantalla de reportes del administrador: viajes por usuario (RF25), uso por estación (RF27)
+// y vehículos con más fallas (RF26).
 
 public class PanelReportes extends PanelBase {
     private DefaultTableModel modelo;
@@ -65,7 +65,7 @@ public class PanelReportes extends PanelBase {
         }
     }
 
-    // RF26
+    // RF27
     private void mostrarUsoPorEstacion() {
         modelo.setColumnIdentifiers(new String[]{"Estación", "Dirección", "Viajes (retiros y devoluciones)", "Ocupación actual"});
         for (Estacion e : sistema.getEstaciones().getEstaciones()) {
@@ -75,7 +75,7 @@ public class PanelReportes extends PanelBase {
         }
     }
 
-    // RF27: ordenado con ComparadorVehiculosPorFallas (Comparator)
+    // RF26: ordenado con ComparadorVehiculosPorFallas (Comparator)
     private void mostrarVehiculosConMasFallas() {
         modelo.setColumnIdentifiers(new String[]{"Vehículo", "Tipo", "Fallas reportadas", "Órdenes de mantenimiento", "Estado"});
         for (Vehiculo v : sistema.getMantenimiento().listarVehiculosConMasFallas()) {
