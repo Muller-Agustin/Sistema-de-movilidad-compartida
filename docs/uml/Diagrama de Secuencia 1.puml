@@ -5,7 +5,6 @@ skinparam defaultFontName Arial
 skinparam defaultFontSize 12
 skinparam sequenceMessageAlign center
 skinparam responseMessageBelowArrow true
-skinparam ParticipantPadding 22
 skinparam BoxPadding 10
 skinparam sequence {
   ArrowColor #333333
@@ -46,15 +45,16 @@ else Usuario habilitado
     T --> U: saldoMinimo
     U -> C: tieneSaldoSuficiente(saldoMinimo)
     C --> U: saldoSuficiente
-    U -> U: puedeRetirar(saldoMinimo)
 
     alt Saldo insuficiente
       U --> A: Rechazar retiro: saldo insuficiente
     else Saldo suficiente
       U -> E: getVehiculosDisponibles()
+      loop Por cada vehículo guardado en la estación
+        E -> V: puedeRetirarse()
+        V --> E: true/false
+      end
       E --> U: listaVehiculos
-      U -> V: puedeRetirarse()
-      V --> U: puedeRetirarse
 
       alt Vehículo no disponible o no pertenece a la estación
         U --> A: Rechazar retiro: vehículo no disponible en esta estación

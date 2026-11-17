@@ -4,7 +4,6 @@ skinparam defaultFontName Arial
 skinparam defaultFontSize 12
 skinparam sequenceMessageAlign center
 skinparam responseMessageBelowArrow true
-skinparam ParticipantPadding 22
 skinparam BoxPadding 10
 skinparam sequence {
   ArrowColor #333333
@@ -67,14 +66,17 @@ else Estación con capacidad disponible
   T --> J: importeBase
   J --> U: importeFinal con promoción aplicada
 
-  U -> C: debitar(importeFinal, "Viaje")
-  create participant "debito:Debito" as D
-  C -> D: Debito(importeFinal, "Viaje")
-  C --> U: débito registrado
-  U -> C: tieneSaldoNegativo()
-  C --> U: saldoNegativo
-  alt Saldo negativo después del débito
-    U -> U: inhabilitar()
+  opt importeFinal > 0
+    U -> U: cobrar(importeFinal, "Viaje", horaFin)
+    U -> C: debitar(importeFinal, "Viaje", horaFin)
+    create participant "debito:Debito" as D
+    C -> D: Debito(horaFin, importeFinal, "Viaje")
+    C --> U: débito registrado
+    U -> U: actualizarHabilitacion()
+    U -> C: getSaldo()
+    C --> U: saldo
+  end
+  alt saldo < 0
     U --> A: Devolución confirmada; usuario inhabilitado hasta regularizar el saldo
   else Saldo no negativo
     U --> A: Devolución confirmada; importe debitado

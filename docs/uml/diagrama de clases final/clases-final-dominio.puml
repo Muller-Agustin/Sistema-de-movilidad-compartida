@@ -314,4 +314,20 @@ Estacion "0..1" o-- "0..*" Vehiculo
 Estacion "1" *-- "0..*" AlertaRedistribucion
 AlertaRedistribucion --> TipoAlerta
 Traslado --> "1" Estacion : origen
-Traslado -->
+Traslado -->"1" Estacion : destino
+Traslado o-- "1..*" Vehiculo : vehiculos
+Traslado --> "1" Operador : responsable
+
+' ===== Vehículos y mantenimiento =====
+interface "Comparable<Vehiculo>" as Comparable
+interface "Comparator<Vehiculo>" as Comparator
+Comparable <|.. Vehiculo
+Comparator <|.. ComparadorVehiculosPorFallas
+ComparadorVehiculosPorFallas ..> Vehiculo : compara
+Vehiculo --> EstadoVehiculo
+Vehiculo ..> TipoVehiculo
+Vehiculo "1" -- "0..*" ReporteFalla
+Vehiculo "1" -- "0..*" OrdenMantenimiento
+OrdenMantenimiento "0..*" -- "1" Tecnico
+ReporteFalla --> "1" Reportante
+@enduml

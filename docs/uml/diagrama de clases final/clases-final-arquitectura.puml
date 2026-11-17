@@ -136,3 +136,37 @@ Main ..> VentanaPrincipal : abre
 VentanaPrincipal "1" *-- "6" PanelBase
 VentanaPrincipal --> GestorArchivos : guarda al cerrar
 PanelBase <|-- PanelInicio
+PanelBase <|-- PanelUsuarios
+PanelBase <|-- PanelViajes
+PanelBase <|-- PanelVehiculos
+PanelBase <|-- PanelEstaciones
+PanelBase <|-- PanelReportes
+PanelBase --> "1" SistemaMovilidad
+
+' ===== Persistencia =====
+GestorArchivos ..> SistemaMovilidad : guarda / carga
+SistemaMovilidad "1" *-- "1" ControladorUsuarios
+SistemaMovilidad "1" *-- "1" ControladorViajes
+SistemaMovilidad "1" *-- "1" ControladorMantenimiento
+SistemaMovilidad "1" *-- "1" ControladorEstaciones
+SistemaMovilidad "1" o-- "0..*" Operador
+
+' ===== Controladores -> dominio =====
+ControladorUsuarios "1" o-- "0..*" Usuario
+ControladorViajes "1" o-- "0..*" Viaje
+ControladorViajes "1" o-- "0..*" Tarifa
+ControladorViajes "1" o-- "0..*" Promocion
+ControladorViajes ..> Usuario : delega retiro y devolución
+ControladorMantenimiento "1" o-- "0..*" Vehiculo
+ControladorMantenimiento "1" o-- "0..*" Tecnico
+ControladorMantenimiento "1" o-- "0..*" OrdenMantenimiento
+ControladorEstaciones "1" o-- "0..*" Estacion
+ControladorEstaciones "1" o-- "0..*" Traslado
+
+' ===== Excepciones =====
+ControladorViajes ..> RetiroNoPermitidoExcepcion : throws
+ControladorViajes ..> VehiculoNoDisponibleExcepcion : throws
+ControladorViajes ..> EstacionLlenaExcepcion : throws
+ControladorUsuarios ..> SaldoInsuficienteExcepcion : throws
+ControladorMantenimiento ..> OrdenIncompletaExcepcion : throws
+@enduml
