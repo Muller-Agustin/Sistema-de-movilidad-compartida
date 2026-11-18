@@ -5,6 +5,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import EstacionesTraslados.Coordenada;
@@ -123,6 +124,9 @@ public class Viaje implements Serializable {
 
     // RN18: solo se cancela dentro de los 2 minutos; el vehículo vuelve a la estación de retiro sin cargo
     public void cancelar(LocalDateTime ahora) throws EstacionLlenaExcepcion {
+        if (estado != EstadoViaje.EN_CURSO) {
+            throw new IllegalStateException("Solo se puede cancelar un viaje en curso");
+        }
         if (Duration.between(inicio, ahora).toMinutes() >= LIMITE_CANCELACION_MINUTOS) {
             throw new IllegalStateException("Pasaron más de " + LIMITE_CANCELACION_MINUTOS + " minutos: el viaje no se puede cancelar");
         }
@@ -187,11 +191,11 @@ public class Viaje implements Serializable {
     }
 
     public List<PuntoRecorrido> getPuntosRecorrido() {
-        return puntosRecorrido;
+        return Collections.unmodifiableList(puntosRecorrido);
     }
 
     public List<NotaAjuste> getNotasAjuste() {
-        return notasAjuste;
+        return Collections.unmodifiableList(notasAjuste);
     }
 
     public Promocion getPromocion() {

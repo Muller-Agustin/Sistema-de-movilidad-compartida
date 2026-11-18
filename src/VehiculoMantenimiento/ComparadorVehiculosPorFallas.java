@@ -2,7 +2,7 @@ package VehiculoMantenimiento;
 
 import java.util.Comparator;
 
-// Orden personalizado (Comparator) para el reporte RF27: primero los vehículos con más fallas.
+// Orden personalizado (Comparator) para el reporte RF26: primero los vehículos con más fallas.
 // Si empatan, se usa el orden natural de Vehiculo (por código).
 
 public class ComparadorVehiculosPorFallas implements Comparator<Vehiculo> {

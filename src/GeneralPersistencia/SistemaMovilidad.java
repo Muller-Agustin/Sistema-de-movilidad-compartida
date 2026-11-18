@@ -2,6 +2,7 @@ package GeneralPersistencia;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import EstacionesTraslados.ControladorEstaciones;
@@ -62,6 +63,6 @@ public class SistemaMovilidad implements Serializable {
     }
 
     public List<Operador> getOperadores() {
-        return operadores;
+        return Collections.unmodifiableList(operadores);
     }
 }

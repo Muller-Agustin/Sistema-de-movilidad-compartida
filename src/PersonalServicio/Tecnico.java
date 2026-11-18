@@ -1,6 +1,7 @@
 package PersonalServicio;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import VehiculoMantenimiento.OrdenMantenimiento;
@@ -31,6 +32,6 @@ public class Tecnico extends Personal {
     }
 
     public List<OrdenMantenimiento> getOrdenes() {
-        return ordenes;
+        return Collections.unmodifiableList(ordenes);
     }
 }

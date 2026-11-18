@@ -13,6 +13,9 @@ public abstract class VehiculoElectrico extends Vehiculo {
 
     public VehiculoElectrico(String codigo, LocalDate fechaAlta, int nivelBateria) {
         super(codigo, fechaAlta);
+        if (nivelBateria < 0 || nivelBateria > 100) {
+            throw new IllegalArgumentException("El nivel de batería debe estar entre 0 y 100");
+        }
         this.nivelBateria = nivelBateria;
         if (tieneBateriaBaja()) {
             setEstado(EstadoVehiculo.BATERIA_BAJA);

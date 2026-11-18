@@ -3,6 +3,7 @@ package VehiculoMantenimiento;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import Excepciones.OrdenIncompletaExcepcion;
@@ -89,10 +90,10 @@ public class OrdenMantenimiento implements Serializable {
     }
 
     public List<String> getTareasRealizadas() {
-        return tareasRealizadas;
+        return Collections.unmodifiableList(tareasRealizadas);
     }
 
     public List<String> getRepuestosUtilizados() {
-        return repuestosUtilizados;
+        return Collections.unmodifiableList(repuestosUtilizados);
     }
 }

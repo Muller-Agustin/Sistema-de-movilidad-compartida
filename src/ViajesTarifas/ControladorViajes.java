@@ -4,6 +4,7 @@ import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import EstacionesTraslados.Coordenada;
@@ -79,7 +80,7 @@ public class ControladorViajes implements Serializable {
         return usuario.finalizarViaje(estacion, promociones, LocalDateTime.now());
     }
 
-    // RF06: mientras el viaje está en curso se registran los puntos del recorrido
+    // RF09: mientras el viaje está en curso se registran los puntos del recorrido
     public void registrarPunto(Viaje viaje, Coordenada coordenada) {
         if (viaje.getEstado() != EstadoViaje.EN_CURSO) {
             throw new IllegalStateException("Solo se registran puntos en un viaje en curso");
@@ -118,7 +119,7 @@ public class ControladorViajes implements Serializable {
         return nota;
     }
 
-    // RF26: reporte de uso por estación (viajes que empezaron o terminaron en ella)
+    // RF27: reporte de uso por estación (viajes que empezaron o terminaron en ella)
     public int contarViajesPorEstacion(Estacion estacion) {
         int cantidad = 0;
         for (Viaje viaje : viajes) {
@@ -140,14 +141,14 @@ public class ControladorViajes implements Serializable {
     }
 
     public List<Tarifa> getTarifas() {
-        return tarifas;
+        return Collections.unmodifiableList(tarifas);
     }
 
     public List<Promocion> getPromociones() {
-        return promociones;
+        return Collections.unmodifiableList(promociones);
     }
 
     public List<Viaje> getViajes() {
-        return viajes;
+        return Collections.unmodifiableList(viajes);
     }
 }

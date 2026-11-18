@@ -3,6 +3,7 @@ package UsuariosCuenta;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 // Cuenta del usuario: saldo, medios de pago y el historial de movimientos.
@@ -26,7 +27,10 @@ public class Cuenta implements Serializable {
     }
 
     // RF03: solo se puede recargar con un medio de pago ya registrado
-    public void recargar(double importe, MedioPago medio, LocalDateTime fecha) {
+    void recargar(double importe, MedioPago medio, LocalDateTime fecha) {
+        if (importe <= 0) {
+            throw new IllegalArgumentException("El importe de la recarga debe ser mayor a cero");
+        }
         if (!mediosPago.contains(medio)) {
             throw new IllegalArgumentException("El medio de pago no está registrado en la cuenta");
         }
@@ -34,12 +38,12 @@ public class Cuenta implements Serializable {
     }
 
     // RN03: el saldo puede quedar negativo; qué pasa con el usuario lo decide Usuario
-    public void debitar(double importe, String concepto, LocalDateTime fecha) {
+    void debitar(double importe, String concepto, LocalDateTime fecha) {
         registrar(new Debito(fecha, importe, concepto));
     }
 
     // RN24: ajuste del operador
-    public void ajustar(double importe, String motivo, LocalDateTime fecha) {
+    void ajustar(double importe, String motivo, LocalDateTime fecha) {
         registrar(new Ajuste(fecha, importe, motivo));
     }
 
@@ -57,10 +61,10 @@ public class Cuenta implements Serializable {
     }
 
     public List<Movimiento> getMovimientos() {
-        return movimientos;
+        return Collections.unmodifiableList(movimientos);
     }
 
     public List<MedioPago> getMediosPago() {
-        return mediosPago;
+        return Collections.unmodifiableList(mediosPago);
     }
 }

@@ -3,6 +3,7 @@ package VehiculoMantenimiento;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import EstacionesTraslados.Estacion;
@@ -27,6 +28,9 @@ public abstract class Vehiculo implements Comparable<Vehiculo>, Serializable {
 
     // RF11: se crea disponible y con 0 km
     public Vehiculo(String codigo, LocalDate fechaAlta) {
+        if (codigo == null || codigo.trim().isEmpty() || fechaAlta == null) {
+            throw new IllegalArgumentException("El vehículo necesita código y fecha de alta");
+        }
         this.codigo = codigo;
         this.fechaAlta = fechaAlta;
         this.kmRecorridos = 0;
@@ -174,10 +178,10 @@ public abstract class Vehiculo implements Comparable<Vehiculo>, Serializable {
     }
 
     public List<ReporteFalla> getReportesFalla() {
-        return reportesFalla;
+        return Collections.unmodifiableList(reportesFalla);
     }
 
     public List<OrdenMantenimiento> getOrdenesMantenimiento() {
-        return ordenesMantenimiento;
+        return Collections.unmodifiableList(ordenesMantenimiento);
     }
 }
